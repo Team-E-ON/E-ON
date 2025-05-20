@@ -1,0 +1,232 @@
+body {
+    background: #222;
+    margin: 0;
+    padding: 0;
+    font-family: 'Noto Sans KR', sans-serif;
+  }
+  
+  .home-bg {
+    min-height: 100vh;
+    width: 100vw;
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    background: #fff;
+  }
+  
+  .home-wrap {
+    width: 96vw;
+    max-width: 1280px;
+    margin: 40px 0;
+    background: #fff;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+  }
+  
+  /* 네비게이션 */
+  .home-nav {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 36px 60px 0 60px;
+  }
+  
+  .home-logo {
+    font-size: 28px;
+    font-weight: 700;
+    color: #2f5e2e;
+    letter-spacing: 1px;
+  }
+  
+  .home-menu {
+    display: flex;
+    align-items: center;
+    gap: 40px;
+    font-size: 18px;
+    color: #aaa;
+  }
+  
+  .home-menu a {
+    text-decoration: none;
+    color: #999;
+    font-weight: 400;
+  }
+  
+  .home-menu a.active {
+    color: #4ca187;
+    font-weight: 500;
+  }
+  
+  .home-menu a:hover {
+    color: #4ca187;
+  }
+  
+  .home-menu-right {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 14px;
+    color: #aaa;
+  }
+  
+  .home-menu-right a {
+    color: #888;
+    text-decoration: none;
+  }
+  
+  .home-menu-right span {
+    color: #bbb;
+  }
+  
+  /* 메인 레이아웃 */
+  .home-main {
+    display: flex;
+    margin-top: 40px;
+    padding: 0 60px 40px 60px;
+    gap: 40px;
+    align-items: flex-start;
+  }
+  
+  .home-left {
+    width: 140px;
+    flex-shrink: 0;
+  }
+  
+  .dday-title {
+    font-size: 30px;
+    color: #333;
+    font-weight: 500;
+    margin-bottom: 20px;
+  }
+  
+  .dday-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+  
+  .dday-list li {
+    font-size: 15px;
+    color: #111;
+    margin-bottom: 10px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  
+  .dday-list li span:first-child {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    white-space: nowrap;
+  }
+  
+  .dot {
+    display: inline-block;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+  }
+  
+  .dot.green {
+    background: #4ca187;
+  }
+  
+  .dot.yellow {
+    background: #b6b64c;
+  }
+  
+  .dday-num {
+    font-size: 13px;
+    color: #333;
+  }
+  
+  /* 달력 */
+  .home-calendar {
+    flex-grow: 1;
+    width: 100%;
+    padding: 0 20px;
+  }
+  
+  .calendar-header {
+    text-align: center;
+    margin-bottom: 20px;
+  }
+  
+  .calendar-title {
+    font-size: 26px;
+    color: #222;
+    font-weight: 500;
+  }
+  
+  .calendar-table {
+    width: 100%;
+    table-layout: fixed;
+    border-collapse: collapse;
+    background: #fff;
+  }
+  
+  /* 적당한 셀 크기 */
+  .calendar-table th,
+  .calendar-table td {
+    height: 95px;
+    font-size: 16px;
+    text-align: center;
+    vertical-align: middle;
+    font-weight: 300;
+    color: #222;
+    border: none;
+  }
+  
+  .calendar-table td.today {
+    font-weight: 700;
+  }
+  
+  .calendar-table td.empty {
+    color: #ccc;
+  }
+  
+  /* 반응형 */
+  @media (max-width: 1000px) {
+    .home-main {
+      flex-direction: column;
+      padding: 0 20px;
+      gap: 20px;
+    }
+  
+    .calendar-table th,
+    .calendar-table td {
+      height: 70px;
+      font-size: 14px;
+    }
+  
+    .home-left {
+      width: 100%;
+      display: flex;
+      justify-content: space-around;
+    }
+  }
+
+.event {
+  font-size: 12px;
+  margin-top: 4px;
+  padding: 2px 4px;
+  border-radius: 4px;
+  display: block;
+}
+
+.event.green {
+  background-color: #4CAF50;
+  color: white;
+}
+
+.event.yellow {
+  background-color: #FFD700;
+  color: black;
+}
+
+td.today {
+  font-weight: bold;
+  color: #2d7d46; /* 진한 녹색 글씨 */
+}
