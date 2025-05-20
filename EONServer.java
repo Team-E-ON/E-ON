@@ -25,11 +25,10 @@ import java.util.UUID;
 
 public class EONServer {
 
-    static final String DB_URL = "jdbc:mysql://localhost/db2025_eon";
-    static final String USER = "root";
-    static final String PASS = "rina030429";
+    static final String DB_URL = "채우시오";
+    static final String USER = "채우시오";
+    static final String PASS = "채우시오";
 
-    // 세션 ID → 사용자 ID 매핑
     private static final Map<String, String> sessionMap = new HashMap<>();
 
     public static void main(String[] args) throws IOException {
@@ -37,7 +36,7 @@ public class EONServer {
 
         server.createContext("/", exchange -> {
             exchange.getResponseHeaders().add("Location", "/home");
-            exchange.sendResponseHeaders(302, -1); // 302 Found 리디렉션
+            exchange.sendResponseHeaders(302, -1);
             exchange.close();
         });
 
@@ -372,7 +371,7 @@ public class EONServer {
             if (checkUserExists(conn, id)) {
                 return false;
             }
-            insertUser(conn, id, name, password);  // ← 여기 비밀번호 추가됨
+            insertUser(conn, id, name, password);
             insertDepartment(conn, id, majorId, "major", "ud_major");
 
             for (int i = 0; i < minors.size(); i++) {
