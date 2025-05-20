@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+`<!DOCTYPE html>
 <html lang="ko">
 <head>
   <meta charset="UTF-8" />
@@ -21,12 +21,12 @@
       </nav>
 
       <div class="login-center">
-        <form class="login-form" id="login-form">
+        <form class="login-form" id="login-form" action="/login" method="post">
           <div class="login-title">E: ON 로그인</div>
           <label class="login-label">ID</label>
-          <input class="login-input" type="text" id="username" placeholder="ID" required />
+          <input class="login-input" type="text" id="username" name="id" placeholder="ID" required />
           <label class="login-label">PASSWORD</label>
-          <input class="login-input" type="password" id="password" placeholder="PASSWORD" required />
+          <input class="login-input" type="password" id="password" name="password" placeholder="PASSWORD" required />
           <button class="login-btn" type="submit">로그인</button>
           <div class="login-bottom">
             <span>E:ON 회원이 아니신가요?</span>

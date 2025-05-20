@@ -25,9 +25,9 @@ import java.util.UUID;
 
 public class EONServer {
 
-    static final String DB_URL = "jdbc:mysql://localhost/db2025_eon";
-    static final String USER = "root";
-    static final String PASS = "rina030429";
+    static final String DB_URL = "jdbc:mysql://localhost/DB2025Team06";
+    static final String USER = "DB2025Team06";
+    static final String PASS = "DB2025Team06";
 
     // 세션 ID → 사용자 ID 매핑
     private static final Map<String, String> sessionMap = new HashMap<>();
@@ -293,19 +293,16 @@ public class EONServer {
             e.printStackTrace();
         }
 
-        String res;
         if (success) {
             String sessionId = UUID.randomUUID().toString();
             sessionMap.put(sessionId, id);
             exchange.getResponseHeaders().add("Set-Cookie", "sessionId=" + sessionId + "; Path=/");
-            res = "{\"success\": true}";
+            exchange.getResponseHeaders().add("Location", "/home");
+            exchange.sendResponseHeaders(302, -1); // 리디렉션
         } else {
-            res = "{\"success\": false}";
+            exchange.getResponseHeaders().add("Location", "/login.html");
+            exchange.sendResponseHeaders(302, -1); // 로그인 실패 시 다시 로그인 페이지로
         }
-
-        exchange.getResponseHeaders().add("Content-Type", "application/json");
-        exchange.sendResponseHeaders(200, res.getBytes().length);
-        exchange.getResponseBody().write(res.getBytes());
         exchange.close();
     }
 
