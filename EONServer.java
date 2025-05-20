@@ -35,6 +35,12 @@ public class EONServer {
     public static void main(String[] args) throws IOException {
         HttpServer server = HttpServer.create(new InetSocketAddress(8080), 0);
 
+        server.createContext("/", exchange -> {
+            exchange.getResponseHeaders().add("Location", "/home");
+            exchange.sendResponseHeaders(302, -1); // 302 Found 리디렉션
+            exchange.close();
+        });
+
         server.createContext("/home", EONServer::handleHome);
         server.createContext("/mypage", EONServer::handleMypage);
         server.createContext("/login.html", ex -> serveStaticFile(ex, "login.html", "text/html"));
