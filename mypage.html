@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>마이페이지</title>
+  <link rel="stylesheet" href="mypage.css" />
+  <script defer src="mypage.js"></script>
+</head>
+<body>
+  <div class="mypage-bg">
+    <div class="mypage-wrap">
+      <nav class="mypage-nav">
+        <div class="mypage-logo">E: ON</div>
+        <div class="mypage-menu">
+          <a href="/home">홈</a>
+          <a href="schedule_user.html">일정목록</a>
+          <a href="/mypage" class="active">마이페이지</a>
+          <div class="mypage-menu-right">
+            <span>Team 06</span>
+            <span>|</span>
+            <a href="/logout">로그아웃</a>
+          </div>
+        </div>
+      </nav>
+
+      <div class="mypage-content">
+        <div class="profile-section">
+          <h2>PROFILE</h2>
+          <div class="profile-list">
+            <div><span>이름</span><span class="profile-value bold">{{name}}</span></div>
+            <div><span>학번</span><span class="profile-value bold">{{id}}</span></div>
+            <div><span>주전공</span><span class="profile-value">{{major}}</span></div>
+            <div><span>부∙복수전공</span><span class="profile-value">{{subMajors}}</span></div>
+            <div><span>동아리</span><span class="profile-value">{{clubs}}</span></div>
+          </div>
+        </div>
+
+        <div class="side-menu">
+          <div>개인정보 변경</div>
+          <div id="pw-btn" class="clickable">비밀번호 변경</div>
+          <div>회원탈퇴</div>
+        </div>
+      </div>
+
+      <div class="modal-bg" id="modal-bg">
+        <div class="modal">
+          <div class="modal-icon">!</div>
+          <div class="modal-title">비밀번호 변경</div>
+          <input type="password" placeholder="기존 비밀번호 입력" />
+          <input type="password" placeholder="새로운 비밀번호 입력" />
+          <div class="modal-btns">
+            <button class="cancel" id="cancel-btn">취소</button>
+            <button class="change">변경</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

@@ -1,0 +1,219 @@
+body {
+    margin: 0;
+    font-family: 'Noto Sans KR', sans-serif;
+    background: #fff;
+  }
+  
+  .mypage-bg {
+    background: #fff;
+    min-height: 100vh;
+    padding: 40px 0;
+  }
+  
+  .mypage-wrap {
+    width: 95vw;
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+  
+  .mypage-nav {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 70px;
+    border-bottom: 1px solid #eee;
+    padding: 0 40px;
+    background: #fff;
+  }
+  
+  .mypage-logo {
+    font-size: 2rem;
+    font-weight: bold;
+    color: #295c3c;
+    letter-spacing: 2px;
+  }
+  
+  .mypage-menu {
+    display: flex;
+    align-items: center;
+    gap: 60px;
+    font-size: 1rem;
+    color: #295c3c;
+  }
+  
+  .mypage-menu a {
+    color: #295c3c;
+    text-decoration: none;
+    font-weight: 400;
+    margin: 0 10px;
+    transition: color 0.2s;
+  }
+  
+  .mypage-menu a.active {
+    color: #4ca187;
+    text-decoration: underline;
+  }
+  
+  .mypage-menu a:hover {
+    color: #4ca187;
+  }
+  
+  .mypage-menu-right {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    margin-left: auto;
+    color: #888;
+    font-size: 0.9rem;
+  }
+  
+  .mypage-content {
+    display: flex;
+    gap: 40px;
+    justify-content: center; /* 가운데 정렬 */
+    align-items: flex-start; /* 상단 맞추기 */
+    margin-top: 60px;
+  }
+  
+  /* 왼쪽 프로필 박스 */
+  .profile-section {
+    flex: none;
+    width: 700px;
+    background: #f5f5f5;
+    padding: 60px 80px;
+    border-radius: 12px;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+  }
+  
+  /* 오른쪽 사이드 메뉴 */
+  .side-menu {
+    flex: none;
+    width: 220px;
+    background: #f5f5f5;
+    border-radius: 12px;
+    padding: 30px 24px;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+    font-size: 1.05rem;
+    color: #444;
+  }
+  
+  
+  .profile-section h2 {
+    color: #295c3c;
+    font-size: 2rem;
+    margin-bottom: 40px;
+  }
+  
+  .profile-list > div {
+    display: flex;
+    margin-bottom: 18px;
+    font-size: 1.1rem;
+  }
+  
+  .profile-list span:first-child {
+    width: 100px;
+    color: #888;
+  }
+  
+  .profile-value {
+    margin-left: 30px;
+    color: #222;
+  }
+  
+  .bold {
+    font-weight: bold;
+  }
+  
+  
+  .side-menu .clickable {
+    font-weight: bold;
+    color: #295c3c;
+    cursor: pointer;
+  }
+  
+  /* 모달 */
+  .modal-bg {
+    display: none;
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(0, 0, 0, 0.12);
+    align-items: center;
+    justify-content: center;
+    z-index: 100;
+  }
+  
+  .modal-bg.active {
+    display: flex;
+  }
+  
+  .modal {
+    background: #f5f5f5;
+    border-radius: 12px;
+    box-shadow: 0 2px 16px rgba(0, 0, 0, 0.13);
+    width: 320px;
+    padding: 32px 24px 24px 24px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    position: relative;
+  }
+  
+  .modal-icon {
+    width: 48px; height: 48px;
+    background: #d3d3d3;
+    border-radius: 50%;
+    color: #666;
+    font-size: 2rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 10px;
+  }
+  
+  .modal-title {
+    font-weight: bold;
+    margin-bottom: 18px;
+    color: #444;
+  }
+  
+  .modal input {
+    width: 90%;
+    margin-bottom: 10px;
+    padding: 8px 10px;
+    border: none;
+    border-radius: 4px;
+    background: #fff;
+    font-size: 1rem;
+  }
+  
+  .modal-btns {
+    display: flex;
+    gap: 12px;
+    margin-top: 10px;
+    width: 100%;
+    justify-content: center;
+  }
+  
+  .modal-btns .cancel {
+    background: #e6ecec;
+    color: #444;
+    border: none;
+    border-radius: 4px;
+    padding: 8px 24px;
+    font-size: 1rem;
+    cursor: pointer;
+  }
+  
+  .modal-btns .change {
+    background: #e57363;
+    color: #fff;
+    border: none;
+    border-radius: 4px;
+    padding: 8px 24px;
+    font-size: 1rem;
+    cursor: pointer;
+  }
+  

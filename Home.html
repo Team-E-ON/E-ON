@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>홈 - E: ON</title>
+  <link rel="stylesheet" href="Home.css" />
+</head>
+<body>
+<div class="home-bg">
+  <div class="home-wrap">
+
+    <!-- 상단 네비게이션 -->
+    <nav class="home-nav">
+      <div class="home-logo">E: ON</div>
+      <div class="home-menu">
+        <a href="#" class="active">홈</a>
+        <a href="schedule_user.html">일정목록</a>
+        <a href="mypage.html">마이페이지</a>
+        <div class="home-menu-right">
+          <a href="login.html">로그인</a>
+          <span>|</span>
+          <a href="signup.html">회원가입</a>
+        </div>
+      </div>
+    </nav>
+
+    <!-- 본문 -->
+    <main class="home-main">
+      <!-- D-day 섹션 -->
+      <section class="home-left">
+        <div class="dday-title">D-day</div>
+        <ul class="dday-list">
+          {{ddayList}}
+        </ul>
+      </section>
+
+      <!-- 달력 섹션 -->
+      <section class="home-calendar">
+        <div class="calendar-header">
+          <span class="calendar-title">{{calendarTitle}}</span>
+        </div>
+        <table class="calendar-table">
+          <thead>
+          <tr>
+            <th>Mon</th>
+            <th>Tue</th>
+            <th>Wed</th>
+            <th>Thu</th>
+            <th>Fri</th>
+            <th>Sat</th>
+            <th>Sun</th>
+          </tr>
+          </thead>
+          <tbody>
+          {{calendarTable}}
+          </tbody>
+        </table>
+      </section>
+    </main>
+  </div>
+</div>
+</body>
+</html>
