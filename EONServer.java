@@ -85,12 +85,12 @@ public class EONServer {
         try (Connection conn = DriverManager.getConnection(DB_URL, USER, PASS)) {
             Map<Integer, List<String>> eventsByDay = new HashMap<>();
             String eventQuery = """
-                SELECT DAY(date) AS day, title, type
-                FROM DB2025_EVENT e
-                JOIN DB2025_EVENT_LIKE l ON e.id = l.event_id
-                WHERE l.user_id = ?
-                  AND MONTH(date) = MONTH(CURRENT_DATE)
-                  AND YEAR(date) = YEAR(CURRENT_DATE)
+                  SELECT DAY(date) AS day, title, type
+                  FROM DB2025_liked_events_view
+                  WHERE user_id = ?
+                    AND MONTH(date) = MONTH(CURRENT_DATE)
+                    AND YEAR(date) = YEAR(CURRENT_DATE)
+               
             """;
             try (PreparedStatement stmt = conn.prepareStatement(eventQuery)) {
                 stmt.setString(1, userId);
@@ -110,12 +110,11 @@ public class EONServer {
             }
 
             String ddayQuery = """
-                SELECT e.title, DATEDIFF(e.date, CURRENT_DATE) AS d_day, e.type
-                FROM DB2025_EVENT e
-                JOIN DB2025_EVENT_LIKE l ON e.id = l.event_id
-                WHERE l.user_id = ?
-                  AND e.date >= CURRENT_DATE
-                ORDER BY e.date
+                  SELECT title, DATEDIFF(date, CURRENT_DATE) AS d_day, type
+                            FROM db2025_liked_events_view
+                            WHERE user_id = ?
+                              AND date >= CURRENT_DATE
+                            ORDER BY date
             """;
             try (PreparedStatement stmt = conn.prepareStatement(ddayQuery)) {
                 stmt.setString(1, userId);
@@ -188,22 +187,8 @@ public class EONServer {
         String name = "", major = "", subMajors = "", clubs = "";
 
         String query = """
-            SELECT u.name, u.id,
-                   CONCAT_WS(' ', d_major.name, d_major.college_name) AS major,
-                   (SELECT GROUP_CONCAT(CONCAT_WS(' ', d.name, d.college_name) SEPARATOR ', ')
-                    FROM DB2025_USER_DEPARTMENT ud
-                    JOIN DB2025_DEPARTMENT d ON ud.department_id = d.id
-                    WHERE ud.user_id = u.id AND ud.major_type = 'minor') AS sub_majors,
-                   (SELECT GROUP_CONCAT(c.name SEPARATOR ', ')
-                    FROM DB2025_USER_CLUB uc
-                    JOIN DB2025_CLUB c ON uc.club_id = c.id
-                    WHERE uc.user_id = u.id) AS clubs
-            FROM DB2025_USER u
-            LEFT JOIN DB2025_USER_DEPARTMENT ud_major
-              ON u.id = ud_major.user_id AND ud_major.major_type = 'major'
-            LEFT JOIN DB2025_DEPARTMENT d_major
-              ON ud_major.department_id = d_major.id
-            WHERE u.id = ?
+             SELECT * FROM DB2025_mypage_user_info_view
+                    WHERE user_id = ?
         """;
 
         try (Connection conn = DriverManager.getConnection(DB_URL, USER, PASS);
