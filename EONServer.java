@@ -35,6 +35,12 @@ public class EONServer {
     public static void main(String[] args) throws IOException {
         HttpServer server = HttpServer.create(new InetSocketAddress(8080), 0);
 
+        server.createContext("/", exchange -> {
+            exchange.getResponseHeaders().add("Location", "/home");
+            exchange.sendResponseHeaders(302, -1); // 302 Found 리디렉션
+            exchange.close();
+        });
+
         server.createContext("/home", EONServer::handleHome);
         server.createContext("/mypage", EONServer::handleMypage);
         server.createContext("/login.html", ex -> serveStaticFile(ex, "login.html", "text/html"));
@@ -76,7 +82,11 @@ public class EONServer {
 
     private static void handleHome(HttpExchange exchange) throws IOException {
         String userId = getUserIdFromCookie(exchange);
-        if (userId == null) userId = "101"; // fallback
+        if (userId == null) {
+            exchange.getResponseHeaders().add("Location", "/login.html");
+            exchange.sendResponseHeaders(302, -1);
+            return;
+        }
 
         String html = new String(Files.readAllBytes(new File("home.html").toPath()));
         StringBuilder ddayItems = new StringBuilder();
@@ -85,13 +95,12 @@ public class EONServer {
         try (Connection conn = DriverManager.getConnection(DB_URL, USER, PASS)) {
             Map<Integer, List<String>> eventsByDay = new HashMap<>();
             String eventQuery = """
-                  SELECT DAY(date) AS day, title, type
-                  FROM DB2025_liked_events_view
-                  WHERE user_id = ?
-                    AND MONTH(date) = MONTH(CURRENT_DATE)
-                    AND YEAR(date) = YEAR(CURRENT_DATE)
-               
-            """;
+                      SELECT DAY(date) AS day, title, type
+                         FROM DB2025_liked_events_view
+                         WHERE user_id = ?
+                         AND MONTH(date) = MONTH(CURRENT_DATE)
+                         AND YEAR(date) = YEAR(CURRENT_DATE)
+                    """;
             try (PreparedStatement stmt = conn.prepareStatement(eventQuery)) {
                 stmt.setString(1, userId);
                 ResultSet rs = stmt.executeQuery();
@@ -110,12 +119,12 @@ public class EONServer {
             }
 
             String ddayQuery = """
-                  SELECT title, DATEDIFF(date, CURRENT_DATE) AS d_day, type
-                            FROM db2025_liked_events_view
-                            WHERE user_id = ?
-                              AND date >= CURRENT_DATE
+                         SELECT title, DATEDIFF(date, CURRENT_DATE) AS d_day, type
+                             FROM db2025_liked_events_view
+                           WHERE user_id = ?
+                            AND date >= CURRENT_DATE
                             ORDER BY date
-            """;
+                    """;
             try (PreparedStatement stmt = conn.prepareStatement(ddayQuery)) {
                 stmt.setString(1, userId);
                 ResultSet rs = stmt.executeQuery();
@@ -147,15 +156,23 @@ public class EONServer {
                     today.getMonth().toString().substring(1).toLowerCase() + " " + year;
             html = html.replace("{{calendarTitle}}", calendarTitle);
 
-            for (int i = 1; i < startDay; i++, cellCount++) calendarTable.append("<td class='empty'></td>");
+            for (int i = 1; i < startDay; i++, cellCount++) {
+                calendarTable.append("<td class='empty'></td>");
+            }
 
             for (int day = 1; day <= totalDays; day++, cellCount++) {
-                if (cellCount % 7 == 0 && cellCount != 0) calendarTable.append("</tr><tr>");
+                if (cellCount % 7 == 0 && cellCount != 0) {
+                    calendarTable.append("</tr><tr>");
+                }
                 boolean isToday = (day == todayDay);
                 calendarTable.append("<td");
-                if (isToday) calendarTable.append(" class='today'");
+                if (isToday) {
+                    calendarTable.append(" class='today'");
+                }
                 calendarTable.append(">" + String.format("%02d", day));
-                if (eventsByDay.containsKey(day)) eventsByDay.get(day).forEach(calendarTable::append);
+                if (eventsByDay.containsKey(day)) {
+                    eventsByDay.get(day).forEach(calendarTable::append);
+                }
                 calendarTable.append("</td>");
             }
             while (cellCount % 7 != 0) {
@@ -180,16 +197,20 @@ public class EONServer {
 
     private static void handleMypage(HttpExchange exchange) throws IOException {
         String id = getUserIdFromCookie(exchange);
-        if (id == null) id = "101";
+        if (id == null) {
+            exchange.getResponseHeaders().add("Location", "/login.html");
+            exchange.sendResponseHeaders(302, -1);
+            return;
+        }
 
         String html = new String(Files.readAllBytes(new File("mypage.html").toPath()));
 
         String name = "", major = "", subMajors = "", clubs = "";
 
         String query = """
-             SELECT * FROM DB2025_mypage_user_info_view
-                    WHERE user_id = ?
-        """;
+                SELECT * FROM DB2025_mypage_user_info_view
+                                    WHERE user_id = ?
+                """;
 
         try (Connection conn = DriverManager.getConnection(DB_URL, USER, PASS);
              PreparedStatement stmt = conn.prepareStatement(query)) {
@@ -310,7 +331,9 @@ public class EONServer {
         List<Long> list = new ArrayList<>();
         for (String n : names) {
             long id = n.matches("\\d+") ? Long.parseLong(n) : mapMajor(n);
-            if (id > 0) list.add(id);
+            if (id > 0) {
+                list.add(id);
+            }
         }
         return list;
     }
@@ -325,19 +348,24 @@ public class EONServer {
         };
     }
 
-    private static boolean insertUserAll(long id, String name, String password, long majorId, List<Long> minors, List<Long> clubs) {
+    private static boolean insertUserAll(long id, String name, String password, long majorId, List<Long> minors,
+                                         List<Long> clubs) {
         try (Connection conn = DriverManager.getConnection(DB_URL, USER, PASS)) {
             conn.setAutoCommit(false);
 
-            if (checkUserExists(conn, id)) return false;
+            if (checkUserExists(conn, id)) {
+                return false;
+            }
             insertUser(conn, id, name, password);  // ← 여기 비밀번호 추가됨
             insertDepartment(conn, id, majorId, "major", "ud_major");
 
-            for (int i = 0; i < minors.size(); i++)
+            for (int i = 0; i < minors.size(); i++) {
                 insertDepartment(conn, id, minors.get(i), "minor", "ud_minor_" + i);
+            }
 
-            for (int i = 0; i < clubs.size(); i++)
+            for (int i = 0; i < clubs.size(); i++) {
                 insertClub(conn, id, clubs.get(i), "uc_" + i);
+            }
 
             conn.commit();
             return true;
@@ -365,8 +393,10 @@ public class EONServer {
         }
     }
 
-    private static void insertDepartment(Connection conn, long userId, long deptId, String type, String genId) throws SQLException {
-        try (PreparedStatement ps = conn.prepareStatement("INSERT INTO DB2025_USER_DEPARTMENT (id, user_id, department_id, major_type) VALUES (?, ?, ?, ?)")) {
+    private static void insertDepartment(Connection conn, long userId, long deptId, String type, String genId)
+            throws SQLException {
+        try (PreparedStatement ps = conn.prepareStatement(
+                "INSERT INTO DB2025_USER_DEPARTMENT (id, user_id, department_id, major_type) VALUES (?, ?, ?, ?)")) {
             ps.setString(1, genId);
             ps.setLong(2, userId);
             ps.setLong(3, deptId);
@@ -376,7 +406,8 @@ public class EONServer {
     }
 
     private static void insertClub(Connection conn, long userId, long clubId, String genId) throws SQLException {
-        try (PreparedStatement ps = conn.prepareStatement("INSERT INTO DB2025_USER_CLUB (id, user_id, club_id) VALUES (?, ?, ?)")) {
+        try (PreparedStatement ps = conn.prepareStatement(
+                "INSERT INTO DB2025_USER_CLUB (id, user_id, club_id) VALUES (?, ?, ?)")) {
             ps.setString(1, genId);
             ps.setLong(2, userId);
             ps.setLong(3, clubId);
