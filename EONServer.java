@@ -511,14 +511,27 @@ public class EONServer {
             return;
         }
 
+        String loggedInUserId = getUserIdFromCookie(exchange); // 현재 로그인된 사용자 ID 가져오기
+        if (loggedInUserId == null) {
+            exchange.getResponseHeaders().add("Location", "/login.html");
+            exchange.sendResponseHeaders(302, -1);
+            return;
+        }
+
         String body = new BufferedReader(new InputStreamReader(exchange.getRequestBody(), StandardCharsets.UTF_8))
                 .lines().reduce("", (acc, line) -> acc + line);
 
         Map<String, String> params = parseQuery(body);
-        String userId = params.get("userId");
+        String userIdToDelete = params.get("userId"); // 요청 본문에서 탈퇴할 사용자 ID 가져오기
 
-        if (userId == null) {
+        if (userIdToDelete == null) {
             exchange.sendResponseHeaders(400, -1);
+            return;
+        }
+
+        // 로그인된 사용자와 탈퇴 요청 사용자 ID가 일치하는지 확인
+        if (!loggedInUserId.equals(userIdToDelete)) {
+            exchange.sendResponseHeaders(403, -1); // 권한 없음
             return;
         }
 
@@ -526,10 +539,14 @@ public class EONServer {
 
         try (Connection conn = DriverManager.getConnection(DB_URL, USER, PASS);
              PreparedStatement stmt = conn.prepareStatement(query)) {
-            stmt.setString(1, userId);
+            stmt.setString(1, userIdToDelete); // 일치하는 사용자 ID 사용
             int deleted = stmt.executeUpdate();
 
             if (deleted > 0) {
+                // 회원 탈퇴 성공 시 세션도 만료
+                exchange.getResponseHeaders()
+                        .add("Set-Cookie", "sessionId=; Path=/; Expires=Thu, 01 Jan 1970 00:00:00 GMT");
+                sessionMap.remove(loggedInUserId); // 세션 맵에서도 제거
                 exchange.sendResponseHeaders(200, -1);
             } else {
                 exchange.sendResponseHeaders(404, -1);
