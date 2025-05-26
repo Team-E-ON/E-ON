@@ -5,7 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>마이페이지</title>
   <link rel="stylesheet" href="mypage.css" />
-  <script defer src="mypage.js"></script>
 </head>
 <body>
   <div class="mypage-bg">
@@ -37,9 +36,9 @@
         </div>
 
         <div class="side-menu">
-          <div>개인정보 변경</div>
+          <div id="info-change" class="clickable">개인정보 변경</div>
           <div id="pw-btn" class="clickable">비밀번호 변경</div>
-          <div>회원탈퇴</div>
+          <div id="withdraw" class="clickable">회원탈퇴</div>
         </div>
       </div>
 
@@ -47,15 +46,93 @@
         <div class="modal">
           <div class="modal-icon">!</div>
           <div class="modal-title">비밀번호 변경</div>
-          <input type="password" placeholder="기존 비밀번호 입력" />
-          <input type="password" placeholder="새로운 비밀번호 입력" />
+          <input type="password" id="old-password" placeholder="기존 비밀번호 입력" />
+          <input type="password" id="new-password" placeholder="새로운 비밀번호 입력" />
           <div class="modal-btns">
             <button class="cancel" id="cancel-btn">취소</button>
-            <button class="change">변경</button>
+            <button class="change" id="change-btn">변경</button>
           </div>
         </div>
       </div>
     </div>
   </div>
+
+    <script>
+      const openModalBtn = document.getElementById('pw-btn');
+      const cancelModalBtn = document.getElementById('cancel-btn');
+      const modalBg = document.getElementById('modal-bg');
+
+      openModalBtn.addEventListener('click', () => {
+        modalBg.classList.add('active');
+      });
+
+      cancelModalBtn.addEventListener('click', () => {
+        modalBg.classList.remove('active');
+      });
+
+      const changeBtn = document.getElementById('change-btn');
+      changeBtn.addEventListener('click', async () => {
+        const oldPassword = document.getElementById('old-password').value.trim();
+        const newPassword = document.getElementById('new-password').value.trim();
+
+        if (!oldPassword || !newPassword) {
+          alert('비밀번호를 모두 입력하세요.');
+          return;
+        }
+
+        try {
+          const res = await fetch('/mypage.html/change-password', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+            body: new URLSearchParams({ oldPassword, newPassword, userId: '{{id}}' }) // 임시로 id 템플릿 사용
+          });
+
+          if (res.ok) {
+            alert('비밀번호가 성공적으로 변경되었습니다.');
+            modalBg.classList.remove('active');
+            // 입력창 초기화
+            document.getElementById('old-password').value = '';
+            document.getElementById('new-password').value = '';
+          } else if (res.status === 401) {
+            alert('기존 비밀번호가 일치하지 않습니다.');
+          } else {
+            alert('비밀번호 변경 중 오류가 발생했습니다.');
+          }
+        } catch (e) {
+          alert('서버와 연결할 수 없습니다.');
+        }
+      });
+
+      document.addEventListener('DOMContentLoaded', () => {
+        document.getElementById('info-change').addEventListener('click', () => {
+          alert('개인정보 변경 버튼됨');
+        });
+      });
+
+      document.getElementById('withdraw').addEventListener('click', async () => {
+        if (!confirm('정말 회원탈퇴 하시겠습니까? 이 작업은 되돌릴 수 없습니다.')) {
+          return;
+        }
+
+        try {
+          const res = await fetch('/mypage.html/delete-user', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+            body: new URLSearchParams({ userId: '{{id}}' }) // 서버에서 실제 아이디 넣어야 함
+          });
+
+          if (res.ok) {
+            alert('회원탈퇴가 완료되었습니다.');
+            window.location.href = 'Home.html';  // 탈퇴 후 홈 화면으로 이동
+          } else if (res.status === 404) {
+            alert('사용자를 찾을 수 없습니다.');
+          } else {
+            alert('회원탈퇴 중 오류가 발생했습니다.');
+          }
+        } catch (e) {
+          alert('서버와 연결할 수 없습니다.');
+        }
+      });
+    </script>
 </body>
 </html>

@@ -2,11 +2,8 @@ package dbTransaction2025;
 
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpServer;
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.OutputStream;
+
+import java.io.*;
 import java.net.InetSocketAddress;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
@@ -52,6 +49,10 @@ public class EONServer {
         server.createContext("/mypage.css", ex -> serveStaticFile(ex, "mypage.css", "text/css"));
         server.createContext("/login.css", ex -> serveStaticFile(ex, "login.css", "text/css"));
         server.createContext("/signup.css", ex -> serveStaticFile(ex, "signup.css", "text/css"));
+
+        server.createContext("/mypage.html/change-password", EONServer::handleChangePassword);
+        server.createContext("/mypage.html/delete-user", EONServer::handleDeleteUser);
+
         server.setExecutor(null);
         server.start();
         System.out.println("서버 실행 중: http://localhost:8080");
@@ -425,6 +426,112 @@ public class EONServer {
             ps.setLong(2, userId);
             ps.setLong(3, clubId);
             ps.executeUpdate();
+        }
+    }
+
+    private static void handleChangePassword(HttpExchange exchange) throws IOException {
+        if (!exchange.getRequestMethod().equalsIgnoreCase("POST")) {
+            exchange.sendResponseHeaders(405, -1);
+            return;
+        }
+
+        String body = new BufferedReader(new InputStreamReader(exchange.getRequestBody(), StandardCharsets.UTF_8))
+                .lines().reduce("", (acc, line) -> acc + line);
+        Map<String, String> params = parseQuery(body);
+
+        String oldPassword = params.get("oldPassword");
+        String newPassword = params.get("newPassword");
+        String userId = params.get("userId");
+
+        if (oldPassword == null || newPassword == null || userId == null) {
+            exchange.sendResponseHeaders(400, -1);
+            return;
+        }
+
+        String queryCheck = "SELECT password FROM DB2025_USER WHERE id = ?";
+        String queryUpdate = "UPDATE DB2025_USER SET password = ? WHERE id = ?";
+
+        try (Connection conn = DriverManager.getConnection(DB_URL, USER, PASS);
+             PreparedStatement stmtCheck = conn.prepareStatement(queryCheck)) {
+
+            stmtCheck.setString(1, userId);
+            ResultSet rs = stmtCheck.executeQuery();
+
+            if (rs.next()) {
+                String currentPassword = rs.getString("password");
+
+                if (!currentPassword.equals(oldPassword)) {
+                    // 기존 비밀번호 불일치
+                    exchange.sendResponseHeaders(401, -1);
+                    return;
+                }
+
+                // 비밀번호 변경
+                try (PreparedStatement stmtUpdate = conn.prepareStatement(queryUpdate)) {
+                    stmtUpdate.setString(1, newPassword);
+                    stmtUpdate.setString(2, userId);
+                    int updated = stmtUpdate.executeUpdate();
+
+                    if (updated > 0) {
+                        exchange.sendResponseHeaders(200, -1);
+                    } else {
+                        exchange.sendResponseHeaders(500, -1);
+                    }
+                }
+            } else {
+                // 사용자 없음
+                exchange.sendResponseHeaders(404, -1);
+            }
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+            exchange.sendResponseHeaders(500, -1);
+        }
+    }
+
+    private static Map<String, String> parseQuery(String query) throws UnsupportedEncodingException {
+        Map<String, String> map = new HashMap<>();
+        for (String param : query.split("&")) {
+            String[] pair = param.split("=", 2);
+            if (pair.length == 2) {
+                map.put(URLDecoder.decode(pair[0], "UTF-8"), URLDecoder.decode(pair[1], "UTF-8"));
+            }
+        }
+        return map;
+    }
+
+    private static void handleDeleteUser(HttpExchange exchange) throws IOException {
+        if (!exchange.getRequestMethod().equalsIgnoreCase("POST")) {
+            exchange.sendResponseHeaders(405, -1);
+            return;
+        }
+
+        String body = new BufferedReader(new InputStreamReader(exchange.getRequestBody(), StandardCharsets.UTF_8))
+                .lines().reduce("", (acc, line) -> acc + line);
+
+        Map<String, String> params = parseQuery(body);
+        String userId = params.get("userId");
+
+        if (userId == null) {
+            exchange.sendResponseHeaders(400, -1);
+            return;
+        }
+
+        String query = "DELETE FROM DB2025_USER WHERE id = ?";
+
+        try (Connection conn = DriverManager.getConnection(DB_URL, USER, PASS);
+             PreparedStatement stmt = conn.prepareStatement(query)) {
+            stmt.setString(1, userId);
+            int deleted = stmt.executeUpdate();
+
+            if (deleted > 0) {
+                exchange.sendResponseHeaders(200, -1);
+            } else {
+                exchange.sendResponseHeaders(404, -1);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+            exchange.sendResponseHeaders(500, -1);
         }
     }
 }
