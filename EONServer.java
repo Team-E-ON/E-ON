@@ -27,7 +27,7 @@ public class EONServer {
 
     static final String DB_URL = "jdbc:mysql://localhost/db2025_eon";
     static final String USER = "root";
-    static final String PASS = "rina030429";
+    static final String PASS = "";
 
     // 세션 ID → 사용자 ID 매핑
     private static final Map<String, String> sessionMap = new HashMap<>();
