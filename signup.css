@@ -4,47 +4,69 @@
     background: #fff;
   }
   
-  .signup-header {
+
+  body {
+    font-family: 'Noto Sans KR', sans-serif;
+  }
+  nav {
     display: flex;
     align-items: center;
     justify-content: space-between;
     height: 70px;
     border-bottom: 1px solid #eee;
-    padding: 0 60px;
+    padding: 0 40px;
     background: #fff;
   }
   
-  .logo {
+  nav .logo {
     font-size: 2rem;
     font-weight: bold;
     color: #295c3c;
     letter-spacing: 2px;
   }
   
-  .signup-header nav {
+  nav .menu {
     display: flex;
-    gap: 40px;
-    font-size: 1.1rem;
-    color: #aaa;
+    align-items: center;
+    gap: 60px;
+    font-size: 1rem;
   }
   
-  .signup-header nav a,
-  .signup-header nav span {
+  nav .menu a {
+    color: #295c3c;
     text-decoration: none;
-    color: #aaa;
-    cursor: pointer;
+    font-weight: 400;
+    margin: 0 10px;
     transition: color 0.2s;
   }
   
-  .signup-header nav .active {
-    color: #295c3c;
-    font-weight: bold;
+  nav .menu a.active {
+    color: #4ca187;
+    text-decoration: underline;
   }
   
-  .signup-header nav a:hover,
-  .user-menu a:hover {
-    color: #295c3c;
+  nav .menu a:hover {
+    color: #4ca187;
   }
+  
+  nav .home-menu-right {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    margin-left: auto;
+    font-size: 0.9rem;
+    color: #888;
+  }
+  
+  nav .home-menu-right a {
+    color: #888;
+    text-decoration: none;
+  }
+  
+  nav .home-menu-right span {
+    color: #bbb;
+  }
+  
   
   .user-menu {
     display: flex;

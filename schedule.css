@@ -19,8 +19,7 @@ body {
   overflow: hidden;
 }
 
-/* ✅ 마이페이지 스타일과 통일된 헤더 */
-.mypage-nav {
+nav {
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -30,22 +29,21 @@ body {
   background: #fff;
 }
 
-.mypage-logo {
+nav .logo {
   font-size: 2rem;
   font-weight: bold;
   color: #295c3c;
   letter-spacing: 2px;
 }
 
-.mypage-menu {
+nav .menu {
   display: flex;
   align-items: center;
   gap: 60px;
   font-size: 1rem;
-  color: #295c3c;
 }
 
-.mypage-menu a {
+nav .menu a {
   color: #295c3c;
   text-decoration: none;
   font-weight: 400;
@@ -53,24 +51,32 @@ body {
   transition: color 0.2s;
 }
 
-.mypage-menu a.active {
+nav .menu a.active {
   color: #4ca187;
   text-decoration: underline;
 }
 
-.mypage-menu a:hover {
+nav .menu a:hover {
   color: #4ca187;
 }
 
-.mypage-menu-right {
+nav .home-menu-right {
   display: inline-flex;
   align-items: center;
   gap: 10px;
   margin-left: auto;
-  color: #888;
   font-size: 0.9rem;
+  color: #888;
 }
 
+nav .home-menu-right a {
+  color: #888;
+  text-decoration: none;
+}
+
+nav .home-menu-right span {
+  color: #bbb;
+}
 
 /* 일정 목록 */
 .schedule-list {
