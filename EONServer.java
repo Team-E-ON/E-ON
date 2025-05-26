@@ -2,8 +2,12 @@ package dbTransaction2025;
 
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpServer;
-
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.OutputStream;
+import java.io.UnsupportedEncodingException;
 import java.net.InetSocketAddress;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
@@ -44,6 +48,7 @@ public class EONServer {
         server.createContext("/signup.html", ex -> serveStaticFile(ex, "signup.html", "text/html"));
         server.createContext("/login", EONServer::handleLogin);
         server.createContext("/signup", EONServer::handleSignup);
+        server.createContext("/logout", EONServer::handleLogout);
 
         server.createContext("/Home.css", ex -> serveStaticFile(ex, "Home.css", "text/css"));
         server.createContext("/mypage.css", ex -> serveStaticFile(ex, "mypage.css", "text/css"));
@@ -533,5 +538,29 @@ public class EONServer {
             e.printStackTrace();
             exchange.sendResponseHeaders(500, -1);
         }
+    }
+
+    private static void handleLogout(HttpExchange exchange) throws IOException {
+        // 클라이언트에게 sessionId 쿠키를 삭제하도록 지시
+        exchange.getResponseHeaders().add("Set-Cookie", "sessionId=; Path=/; Expires=Thu, 01 Jan 1970 00:00:00 GMT");
+
+        // 세션 맵에서 해당 세션 ID 제거 (선택 사항이지만 보안 강화에 도움)
+        List<String> cookies = exchange.getRequestHeaders().get("Cookie");
+        if (cookies != null) {
+            for (String cookie : cookies) {
+                for (String pair : cookie.split(";")) {
+                    String[] kv = pair.trim().split("=");
+                    if (kv.length == 2 && kv[0].equals("sessionId")) {
+                        sessionMap.remove(kv[1]);
+                        break;
+                    }
+                }
+            }
+        }
+
+        // 로그인 페이지로 리디렉션
+        exchange.getResponseHeaders().add("Location", "/login.html");
+        exchange.sendResponseHeaders(302, -1);
+        exchange.close();
     }
 }
