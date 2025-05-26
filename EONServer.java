@@ -57,6 +57,7 @@ public class EONServer {
 
         server.createContext("/mypage.html/change-password", EONServer::handleChangePassword);
         server.createContext("/mypage.html/delete-user", EONServer::handleDeleteUser);
+        server.createContext("/mypage.html/change-userinfo", EONServer::handleChangeUserInfo);
 
         server.setExecutor(null);
         server.start();
@@ -579,5 +580,119 @@ public class EONServer {
         exchange.getResponseHeaders().add("Location", "/login.html");
         exchange.sendResponseHeaders(302, -1);
         exchange.close();
+    }
+
+    private static void handleChangeUserInfo(HttpExchange exchange) throws IOException {
+        if (!exchange.getRequestMethod().equalsIgnoreCase("POST")) {
+            exchange.sendResponseHeaders(405, -1); // POST 요청만 허용
+            return;
+        }
+
+        String loggedInUserId = getUserIdFromCookie(exchange);
+        if (loggedInUserId == null) {
+            exchange.getResponseHeaders().add("Location", "/login.html");
+            exchange.sendResponseHeaders(302, -1); // 로그인되지 않은 사용자 리디렉션
+            return;
+        }
+
+        String body = new BufferedReader(new InputStreamReader(exchange.getRequestBody(), StandardCharsets.UTF_8))
+                .lines().reduce("", (acc, line) -> acc + line);
+
+        Map<String, List<String>> params = new HashMap<>();
+        for (String pair : body.split("&")) {
+            String[] parts = pair.split("=");
+            String key = URLDecoder.decode(parts[0], "UTF-8");
+            String value = parts.length > 1 ? URLDecoder.decode(parts[1], "UTF-8") : "";
+            params.computeIfAbsent(key, k -> new ArrayList<>()).add(value);
+        }
+
+        // 폼 데이터 파싱
+        String newName = params.get("name") != null ? params.get("name").get(0) : null;
+        String newMajorStr = params.get("major") != null ? params.get("major").get(0) : null;
+        List<String> newMinorsStr = params.getOrDefault("minors[]", List.of());
+        List<String> newClubsStr = params.getOrDefault("clubs[]", List.of());
+
+        // ID 매핑
+        long newMajorId = (newMajorStr != null && !newMajorStr.isEmpty()) ? mapMajor(newMajorStr) : -1;
+        List<Long> newMinorIds = mapAll(newMinorsStr);
+        List<Long> newClubIds = mapAll(newClubsStr);
+
+        // 유효성 검사 (필요에 따라 더 엄격하게 추가)
+        if (newName == null || newName.isEmpty() || newMajorId == -1) {
+            exchange.sendResponseHeaders(400, -1); // 필수 정보 누락
+            return;
+        }
+
+        Connection conn = null;
+        try {
+            conn = DriverManager.getConnection(DB_URL, USER, PASS);
+            conn.setAutoCommit(false); // 트랜잭션 시작
+
+            // 1. 사용자 이름 업데이트
+            try (PreparedStatement ps = conn.prepareStatement("UPDATE DB2025_USER SET name = ? WHERE id = ?")) {
+                ps.setString(1, newName);
+                ps.setString(2, loggedInUserId);
+                ps.executeUpdate();
+            }
+
+            // 2. 전공 업데이트 (기존 전공 삭제 후 새로 삽입)
+            // major_type이 'major'인 기존 학과 정보 삭제
+            try (PreparedStatement ps = conn.prepareStatement(
+                    "DELETE FROM DB2025_USER_DEPARTMENT WHERE user_id = ? AND major_type = 'major'")) {
+                ps.setString(1, loggedInUserId);
+                ps.executeUpdate();
+            }
+            // 새로운 전공 삽입
+            if (newMajorId != -1) {
+                // 새 UUID 또는 적절한 ID 생성 방식
+                String newMajorGenId = "ud_major_" + UUID.randomUUID().toString().substring(0, 8);
+                insertDepartment(conn, Long.parseLong(loggedInUserId), newMajorId, "major", newMajorGenId);
+            }
+
+            // 3. 부전공 업데이트 (기존 부전공 모두 삭제 후 새로 삽입)
+            // major_type이 'minor'인 기존 학과 정보 삭제
+            try (PreparedStatement ps = conn.prepareStatement(
+                    "DELETE FROM DB2025_USER_DEPARTMENT WHERE user_id = ? AND major_type = 'minor'")) {
+                ps.setString(1, loggedInUserId);
+                ps.executeUpdate();
+            }
+            // 새로운 부전공 삽입
+            for (int i = 0; i < newMinorIds.size(); i++) {
+                String newMinorGenId = "ud_minor_" + UUID.randomUUID().toString().substring(0, 8);
+                insertDepartment(conn, Long.parseLong(loggedInUserId), newMinorIds.get(i), "minor", newMinorGenId);
+            }
+
+            // 4. 동아리 업데이트 (기존 동아리 모두 삭제 후 새로 삽입)
+            try (PreparedStatement ps = conn.prepareStatement("DELETE FROM DB2025_USER_CLUB WHERE user_id = ?")) {
+                ps.setString(1, loggedInUserId);
+                ps.executeUpdate();
+            }
+            for (int i = 0; i < newClubIds.size(); i++) {
+                String newClubGenId = "uc_" + UUID.randomUUID().toString().substring(0, 8);
+                insertClub(conn, Long.parseLong(loggedInUserId), newClubIds.get(i), newClubGenId);
+            }
+
+            conn.commit(); // 모든 변경 사항 커밋
+            exchange.sendResponseHeaders(200, -1); // 성공 응답
+        } catch (SQLException e) {
+            if (conn != null) {
+                try {
+                    conn.rollback(); // 오류 발생 시 롤백
+                } catch (SQLException ex) {
+                    ex.printStackTrace();
+                }
+            }
+            e.printStackTrace();
+            exchange.sendResponseHeaders(500, -1); // 서버 오류 응답
+        } finally {
+            if (conn != null) {
+                try {
+                    conn.setAutoCommit(true);
+                    conn.close();
+                } catch (SQLException ex) {
+                    ex.printStackTrace();
+                }
+            }
+        }
     }
 }
