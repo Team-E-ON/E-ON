@@ -29,7 +29,7 @@ public class EONServer {
 
     static final String DB_URL = "jdbc:mysql://localhost/DB2025Team06";
     static final String USER = "DB2025Team06";
-    static final String PASS = "DB2025Team06";
+    static final String PASS = "anna0715";
 
     // 세션 ID → 사용자 ID 매핑
     private static final Map<String, String> sessionMap = new HashMap<>();
@@ -78,6 +78,7 @@ public class EONServer {
         });
         server.createContext("/schedule", EONServer::handleSchedulePage);  // 👈 이거 추가!
         server.createContext("/schedule_user.html", ex -> serveStaticFile(ex, "schedule_user.html", "text/html"));
+        server.createContext("/schedule_user", EONServer::handleScheduleUser);
 
         server.createContext("/event/like", EONServer::handleEventLike);
 
@@ -127,20 +128,37 @@ public class EONServer {
 
         Map<String, String> params = queryToMap(body);
         String eventIdStr = params.get("eventId");
-        if (eventIdStr == null) {
+        String likeStr = params.get("like");
+
+        if (eventIdStr == null || likeStr == null) {
             exchange.sendResponseHeaders(400, -1);
             return;
         }
 
         int eventId = Integer.parseInt(eventIdStr);
+        boolean like = Boolean.parseBoolean(likeStr);
 
-        // DB2025_EVENT_LIKE 테이블에 INSERT
-        try (Connection conn = DriverManager.getConnection(DB_URL, USER, PASS);
-             PreparedStatement stmt = conn.prepareStatement(
-                     "INSERT IGNORE INTO DB2025_EVENT_LIKE (user_id, event_id) VALUES (?, ?)")) {
-            stmt.setString(1, userId);
-            stmt.setInt(2, eventId);
-            stmt.executeUpdate();
+        try (Connection conn = DriverManager.getConnection(DB_URL, USER, PASS)) {
+            if (like) {
+                // 좋아요 추가 (UUID 새로 생성)
+                String generatedId = UUID.randomUUID().toString();
+                try (PreparedStatement stmt = conn.prepareStatement(
+                        "INSERT IGNORE INTO DB2025_EVENT_LIKE (id, user_id, event_id) VALUES (?, ?, ?)")) {
+                    stmt.setString(1, generatedId);
+                    stmt.setString(2, userId);
+                    stmt.setInt(3, eventId);
+                    stmt.executeUpdate();
+                }
+            } else {
+                // 좋아요 취소
+                try (PreparedStatement stmt = conn.prepareStatement(
+                        "DELETE FROM DB2025_EVENT_LIKE WHERE user_id = ? AND event_id = ?")) {
+                    stmt.setString(1, userId);
+                    stmt.setInt(2, eventId);
+                    stmt.executeUpdate();
+                }
+            }
+
             exchange.sendResponseHeaders(200, -1);
         } catch (SQLException e) {
             e.printStackTrace();
@@ -1022,6 +1040,102 @@ public class EONServer {
         }
         return result;
     }
+    private static void handleScheduleUser(HttpExchange exchange) throws IOException {
+        String userId = getUserIdFromCookie(exchange);
+        if (userId == null) {
+            exchange.getResponseHeaders().add("Location", "/login.html");
+            exchange.sendResponseHeaders(302, -1);
+            return;
+        }
+
+        StringBuilder html = new StringBuilder();
+
+        try (Connection conn = DriverManager.getConnection(DB_URL, USER, PASS)) {
+            String sql = """
+            SELECT 
+                e.id AS event_id,
+                e.title,
+                e.date,
+                e.type,
+                CASE 
+                    WHEN e.type = 'department' THEN d.name
+                    WHEN e.type = 'club' THEN c.name
+                    ELSE '기타'
+                END AS group_name,
+                CASE 
+                    WHEN l.user_id IS NOT NULL THEN true
+                    ELSE false
+                END AS liked
+            FROM DB2025_EVENT e
+            LEFT JOIN DB2025_DEPARTMENT d ON e.type = 'department' AND e.ref_id = d.id
+            LEFT JOIN DB2025_CLUB c ON e.type = 'club' AND e.ref_id = c.id
+            LEFT JOIN db2025_liked_events_view l 
+                   ON e.id = l.event_id AND l.user_id = ?
+            WHERE EXISTS (
+                SELECT 1 FROM DB2025_USER_DEPARTMENT ud 
+                WHERE ud.user_id = ? AND ud.department_id = e.ref_id AND e.type = 'department'
+            )
+            OR EXISTS (
+                SELECT 1 FROM DB2025_USER_CLUB uc 
+                WHERE uc.user_id = ? AND uc.club_id = e.ref_id AND e.type = 'club'
+            )
+            ORDER BY group_name, e.date
+        """;
+
+            try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+                stmt.setString(1, userId);
+                stmt.setString(2, userId);
+                stmt.setString(3, userId);
+
+                ResultSet rs = stmt.executeQuery();
+                Map<String, List<String>> groupedEvents = new LinkedHashMap<>();
+
+                while (rs.next()) {
+                    String group = rs.getString("group_name");
+                    String title = rs.getString("title");
+                    String date = rs.getString("date");
+                    int eventId = rs.getInt("event_id");
+                    boolean liked = rs.getBoolean("liked");
+
+                    String heart = liked ? "❤️" : "♡";
+
+                    String item = "<div class='schedule-item'>" +
+                            "<div class='item-left'>" +
+                            "<span class='item-title bold'>" + title + "</span>" +
+                            "<span class='item-date'>" + date + "</span>" +
+                            "</div>" +
+                            "<span class='item-actions'>" +
+                            "<button class='heart-btn' data-liked='" + liked + "' data-event-id='" + eventId + "'>" +
+                            heart + "</button>" +
+                            "</span></div>";
+
+                    groupedEvents.computeIfAbsent(group, k -> new ArrayList<>()).add(item);
+                }
+
+                for (Map.Entry<String, List<String>> entry : groupedEvents.entrySet()) {
+                    html.append("<div class='schedule-group'>")
+                            .append("<div class='group-title'>").append(entry.getKey()).append(" 일정</div>");
+                    for (String item : entry.getValue()) {
+                        html.append(item);
+                    }
+                    html.append("</div>");
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+            html.append("<p>일정 정보를 불러오는 중 오류가 발생했습니다.</p>");
+        }
+
+        byte[] response = html.toString().getBytes(StandardCharsets.UTF_8);
+        exchange.getResponseHeaders().add("Content-Type", "text/html; charset=UTF-8");
+        exchange.sendResponseHeaders(200, response.length);
+        try (OutputStream os = exchange.getResponseBody()) {
+            os.write(response);
+        }
+    }
+
+
+
 
     private static void handleEditEvent(HttpExchange exchange) throws IOException {
         if (!"POST".equalsIgnoreCase(exchange.getRequestMethod())) {
