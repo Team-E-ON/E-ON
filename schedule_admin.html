@@ -1,136 +1,321 @@
 <!DOCTYPE html>
-
 <html lang="ko">
+
 <head>
-<meta charset="utf-8"/>
-<title>일정목록 - Admin</title>
-<link href="schedule.css" rel="stylesheet"/>
+    <meta charset="utf-8" />
+    <title>일정목록 - Admin</title>
+    <link href="schedule.css" rel="stylesheet" />
 </head>
+
 <body>
 <div class="main-bg">
-<nav class="mypage-nav">
-<div class="mypage-logo">E: ON</div>
-<div class="mypage-menu">
-<a href="Home.html">홈</a>
-<a href="schedule_user.html">일정목록</a>
-<a class="active" href="../../Downloads/데베%20팀플_프론트/mypage.html">마이페이지</a>
-<div class="mypage-menu-right">
-<span>Team 06</span>
-<span>|</span>
-<a href="Home.html">로그아웃</a>
-</div>
-</div>
-</nav>
-<div class="main-content">
-<div class="schedule-list">
-<!-- 컴퓨터공학과 일정 -->
-<div class="schedule-group">
-<div class="group-title">
-              컴퓨터공학과 일정
-              <button class="add-btn" style="margin-left: 10px;">추가 +</button>
-</div>
-<div class="schedule-item"><div class="item-left"><span class="item-title bold" id="cs-mt">여름 MT</span><span class="item-date">2025.06.21</span></div><span class="item-actions">
-<button class="edit-btn">✎</button>
-<button class="delete-btn">🗑</button>
-</span></div>
-<div class="schedule-item"><div class="item-left"><span class="item-title">졸업프로젝트 전시회</span><span class="item-date">2025.06.29</span></div><span class="item-actions">
-<button class="edit-btn">✎</button>
-<button class="delete-btn">🗑</button>
-</span></div>
-<div class="schedule-item"><div class="item-left"><span class="item-title">AI 특강</span><span class="item-date">2025.06.30</span></div><span class="item-actions">
-<button class="edit-btn">✎</button>
-<button class="delete-btn">🗑</button>
-</span></div>
-</div>
-<!-- 사이버보안학과 일정 -->
-<div class="schedule-group">
-<div class="group-title">
-              사이버보안학과 일정
-              <button class="add-btn" style="margin-left: 10px;">추가 +</button>
-</div>
-<div class="schedule-item"><div class="item-left"><span class="item-title">MAYt-day</span><span class="item-date">2025.06.05</span></div><span class="item-actions">
-<button class="edit-btn">✎</button>
-<button class="delete-btn">🗑</button>
-</span></div>
-<div class="schedule-item"><div class="item-left"><span class="item-title">여름 MT</span><span class="item-date">2025.05.21</span></div><span class="item-actions">
-<button class="edit-btn">✎</button>
-<button class="delete-btn">🗑</button>
-</span></div>
-<div class="schedule-item"><div class="item-left"><span class="item-title">BoB 모집 설명회</span><span class="item-date">2025.06.27</span></div><span class="item-actions">
-<button class="edit-btn">✎</button>
-<button class="delete-btn">🗑</button>
-</span></div>
-</div>
-<!-- 멋쟁이사자처럼 일정 -->
-<div class="schedule-group">
-<div class="group-title" style="color: #b59c2a;">
-              멋쟁이사자처럼 일정
-              <button class="add-btn" style="margin-left: 10px;">추가 +</button>
-</div>
-<div class="schedule-item"><div class="item-left"><span class="item-title">아이디어톤</span><span class="item-date">2025.06.22</span></div><span class="item-actions">
-<button class="edit-btn">✎</button>
-<button class="delete-btn">🗑</button>
-</span></div>
-<div class="schedule-item"><div class="item-left"><span class="item-title">신촌톤</span><span class="item-date">2025.06.22</span></div><span class="item-actions">
-<button class="edit-btn">✎</button>
-<button class="delete-btn">🗑</button>
-</span></div>
-</div>
-<!-- E-COPS 일정 -->
-<div class="schedule-group">
-<div class="group-title" style="color: #b59c2a;">
-              E-COPS 일정
-              <button class="add-btn" style="margin-left: 10px;">추가 +</button>
-</div>
-<div class="schedule-item"><div class="item-left"><span class="item-title">종강 파티</span><span class="item-date">2025.06.22</span></div><span class="item-actions">
-<button class="edit-btn">✎</button>
-<button class="delete-btn">🗑</button>
-</span></div>
-<div class="schedule-item"><div class="item-left"><span class="item-title">여름 MT</span><span class="item-date">2025.06.22</span></div><span class="item-actions">
-<button class="edit-btn">✎</button>
-<button class="delete-btn">🗑</button>
-</span></div>
-</div>
-</div>
-</div>
-</div>
+    <nav class="mypage-nav">
+        <div class="mypage-logo">E: ON</div>
+        <div class="mypage-menu">
+            <a href="Home.html">홈</a>
+            <a href="schedule_user.html">일정목록</a>
+            <a class="active" href="mypage.html">마이페이지</a>
+            <div class="mypage-menu-right">
+                <span>Team 06</span>
+                <span>|</span>
+                <a href="Home.html">로그아웃</a>
+            </div>
+        </div>
+    </nav>
 
-<!-- 모달 -->
-<div class="modal-bg" id="modal-bg">
-<div class="modal">
-<div class="modal-icon">!</div>
-<div class="modal-title">컴퓨터공학과 일정</div>
-<div class="modal-content">
-      [ 일정 제목 ]<br/>
-<b>여름 MT</b><br/><br/>
-      [ 일정 날짜 ]<br/>
-      2025년 6월 21일 (토)<br/><br/>
-      [ 일정 설명 ]<br/>
-      컴퓨터공학과 재학생 대상의 여름 MT<br/>
-      레크리에이션, 네트워킹 프로그램, 친목 활동<br/><br/>
-      [ 장소 ]<br/>
-      경기도 가평 연수원<br/><br/>
-      [ 주최 ]<br/>
-      컴퓨터공학과 학생회
+    <div class="main-content" style="display: none;">
+        <div class="schedule-list">
+
+            <div id="group-container">
+                <!-- 서버에서 받아올 그룹 HTML이 여기에 삽입됨 -->
+            </div>
+
+            <div id="event-container">
+                <!-- 선택된 그룹의 일정이 여기에 출력됨 -->
+            </div>
+
+        </div>
     </div>
-<button class="modal-close-btn" id="close-modal">닫기</button>
+
+    <div class="main-content">
+        <div class="schedule-list">
+
+            <h1>학과 일정</h1>
+            <div class="department-events">
+                {{departmentGroups}}
+            </div>
+
+            <h1>동아리 일정</h1>
+            <div class="club-events">
+                {{clubGroups}}
+            </div>
+
+            <div class="schedule-group" data-group="사이버보안학과">
+                <div class="group-title">사이버보안학과 일정 <button class="add-btn">추가 +</button></div>
+                <div class="schedule-item">
+                    <div class="item-left"><span class="item-title">MAYt-day</span><span
+                            class="item-date">2025.06.05</span>
+                    </div><span class="item-actions"><button class="edit-btn">✎</button><button
+                        class="delete-btn">🗑</button></span>
+                </div>
+            </div>
+
+        </div>
+    </div>
 </div>
+
+<!-- 수정 모달 -->
+<div class="edit-modal-bg" id="edit-modal-bg">
+    <div class="edit-modal">
+        <h3>일정 수정</h3>
+        <input type="text" id="edit-title" placeholder="제목">
+        <input type="date" id="edit-date">
+        <textarea id="edit-content" placeholder="설명"></textarea>
+        <button id="edit-save">저장</button>
+        <button class="modal-close-btn" onclick="closeModal('edit-modal-bg')">닫기</button>
+    </div>
 </div>
+
+<!-- 추가 모달 -->
+<div class="add-modal-bg" id="add-modal-bg">
+    <div class="add-modal">
+        <h3>일정 추가</h3>
+        <select id="group-type-select">
+            <option value="department">학과</option>
+            <option value="club">동아리</option>
+        </select>
+        <select id="group-select">
+            <option value="">선택하세요</option>
+        </select>
+        <input type="text" id="add-title" placeholder="제목">
+        <input type="date" id="add-date">
+        <input type="time" id="add-time">
+        <textarea id="add-content" placeholder="설명"></textarea>
+        <button id="add-save">추가</button>
+        <button class="modal-close-btn" onclick="closeModal('add-modal-bg')">닫기</button>
+    </div>
+</div>
+
+<!-- 오른쪽 하단 플로팅 버튼 -->
+<button id="open-add-modal-btn" class="floating-add-btn">일정 추가 +</button>
+
 <script>
-    // 여름 MT 클릭 시 모달 열기
-    document.getElementById('cs-mt').addEventListener('click', function () {
-      document.getElementById('modal-bg').classList.add('active');
+    function closeModal(id) {
+        document.getElementById(id).classList.remove('active');
+    }
+
+    // 그룹 목록 불러오기 및 렌더링
+    async function fetchGroups() {
+        try {
+            const res = await fetch('/scheduleadmin/groups');
+            if (!res.ok) throw new Error('네트워크 오류');
+            const html = await res.text();
+            document.getElementById('group-container').innerHTML = html;
+
+            // 새로 렌더링된 그룹 요소에 클릭 이벤트 바인딩
+            document.querySelectorAll('.group-item').forEach(item => {
+                item.addEventListener('click', () => {
+                    const type = item.dataset.type;
+                    const group = item.dataset.group;
+                    fetchEvents(type, group);
+                });
+            });
+
+            // select에도 채워주기
+            extractGroupsToSelect();
+        } catch (e) {
+            console.error(e);
+            document.getElementById('group-container').innerHTML = "<p>그룹 정보를 불러오지 못했습니다.</p>";
+        }
+    }
+
+    // 그룹 리스트를 select 요소에 채우기
+    function extractGroupsToSelect() {
+        const deptList = Array.from(document.querySelectorAll('[data-type="department"]')).map(e => e.dataset.group);
+        const clubList = Array.from(document.querySelectorAll('[data-type="club"]')).map(e => e.dataset.group);
+
+        document.getElementById('group-type-select').addEventListener('change', e => {
+            fillGroupSelect(e.target.value, deptList, clubList);
+        });
+
+        fillGroupSelect(document.getElementById('group-type-select').value, deptList, clubList);
+    }
+
+    function fillGroupSelect(type, departments, clubs) {
+        const select = document.getElementById('group-select');
+        select.innerHTML = '<option value="">선택하세요</option>';
+        const list = type === 'department' ? departments : clubs;
+        list.forEach(name => {
+            const opt = document.createElement('option');
+            opt.value = name;
+            opt.textContent = name;
+            select.appendChild(opt);
+        });
+    }
+
+    async function fetchEvents(type, group) {
+        try {
+            const res = await fetch(`/scheduleadmin/events?type=${type}&group=${encodeURIComponent(group)}`);
+            if (!res.ok) throw new Error('일정 불러오기 실패');
+            const html = await res.text();
+            document.getElementById('event-container').innerHTML = html;
+        } catch (e) {
+            console.error(e);
+            document.getElementById('event-container').innerHTML = '<p>일정을 불러오지 못했습니다.</p>';
+        }
+    }
+
+    document.getElementById('open-add-modal-btn').addEventListener('click', () => {
+        document.getElementById('add-modal-bg').classList.add('active');
+        extractGroupsToSelect();  // select 갱신
+        document.getElementById('group-select').value = '';
+        document.getElementById('add-title').value = '';
+        document.getElementById('add-date').value = '';
+        document.getElementById('add-content').value = '';
     });
 
-    // 모달 닫기
-    document.getElementById('close-modal').addEventListener('click', function () {
-      document.getElementById('modal-bg').classList.remove('active');
+    document.getElementById('add-save').addEventListener('click', async () => {
+        const type = document.getElementById('group-type-select').value;
+        const group = document.getElementById('group-select').value;
+        const title = document.getElementById('add-title').value.trim();
+        const date = document.getElementById('add-date').value;
+        const time = document.getElementById('add-time').value;
+        const content = document.getElementById('add-content').value.trim();
+        const datetime = date + " " + time;  // "2025-05-20 14:30" 형태
+
+        if (!group || !title || !date) {
+            alert('모든 필드를 입력하세요.');
+            return;
+        }
+
+        const data = new URLSearchParams();
+        data.append("type", type);
+        data.append("group", group);
+        data.append("title", title);
+        data.append("date", datetime);
+        data.append("content", content);
+
+        try {
+            const res = await fetch('/scheduleadmin/add', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded'
+                },
+                body: data
+            });
+
+            if (res.ok) {
+                alert('일정이 추가되었습니다.');
+                location.reload();
+            } else {
+                alert('추가 실패!');
+            }
+        } catch (e) {
+            console.error(e);
+            alert('서버 오류 발생');
+        }
+
+        document.getElementById('add-modal-bg').classList.remove('active');
     });
 
-    // 배경 클릭 시 모달 닫기
-    document.getElementById('modal-bg').addEventListener('click', function (e) {
-      if (e.target === this) this.classList.remove('active');
+    fetchGroups();  // 초기 그룹 불러오기
+
+    document.addEventListener("DOMContentLoaded", () => {
+        // 모든 삭제 버튼에 클릭 이벤트 추가
+        document.querySelectorAll(".delete-btn").forEach(button => {
+            button.addEventListener("click", async (e) => {
+                if (!confirm("정말 삭제하시겠습니까?")) return;
+
+                // 현재 버튼에서 가장 가까운 .schedule-item을 찾고, 그 안의 .event-id 값을 읽음
+                const scheduleItem = e.target.closest(".schedule-item");
+                const idElem = scheduleItem.querySelector(".event-id");
+                if (!idElem) {
+                    alert("삭제할 이벤트 ID를 찾을 수 없습니다.");
+                    return;
+                }
+
+                const eventId = idElem.textContent.trim();
+
+                try {
+                    // POST 요청 보내기 (fetch API)
+                    const response = await fetch("/scheduleadmin/deletee", {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/x-www-form-urlencoded"
+                        },
+                        body: `id=${encodeURIComponent(eventId)}`
+                    });
+
+                    if (response.ok) {
+                        // 삭제 성공 시 화면에서 해당 일정 항목 제거
+                        scheduleItem.remove();
+                        alert("삭제되었습니다.");
+                    } else {
+                        alert("삭제에 실패했습니다.");
+                    }
+                } catch (error) {
+                    alert("오류가 발생했습니다.");
+                    console.error(error);
+                }
+            });
+        });
     });
-  </script>
+
+    document.addEventListener('click', (e) => {
+        if (e.target.classList.contains('edit-btn')) {
+            const item = e.target.closest('.schedule-item');
+            const id = item.querySelector('.event-id').textContent.trim(); // id 가져오기
+            const title = item.querySelector('.item-title').textContent;
+            const date = item.querySelector('.item-date').textContent;
+            const content = item.querySelector('.item-content').textContent;
+
+            // 모달 값 채우기 (기존 코드 유지)
+            document.getElementById('edit-title').value = title;
+            document.getElementById('edit-date').value = date.split(' ')[0];
+            document.getElementById('edit-content').value = content;
+
+            // 모달 열기
+            document.getElementById('edit-modal-bg').classList.add('active');
+
+            const saveBtn = document.getElementById('edit-save');
+            saveBtn.onclick = async () => {
+                const newTitle = document.getElementById('edit-title').value.trim();
+                const newDate = document.getElementById('edit-date').value;
+                const newContent = document.getElementById('edit-content').value.trim();
+
+                if (!newTitle || !newDate) {
+                    alert('제목과 날짜는 필수입니다.');
+                    return;
+                }
+
+                const params = new URLSearchParams({
+                    id: id,  // id 추가
+                    newTitle,
+                    newDate,
+                    newContent
+                });
+
+                try {
+                    const res = await fetch('/scheduleadmin/edit', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                        body: params.toString()
+                    });
+
+                    if (res.ok) {
+                        alert('수정 완료');
+                        location.reload();
+                    } else {
+                        alert('수정 실패');
+                    }
+                } catch (err) {
+                    alert('서버 오류');
+                }
+                closeModal('edit-modal-bg');
+            };
+        }
+    });
+</script>
 </body>
+
 </html>

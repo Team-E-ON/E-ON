@@ -1,3 +1,46 @@
+.modal-bg,
+.edit-modal-bg,
+.add-modal-bg {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.4);
+  justify-content: center;
+  align-items: center;
+}
+
+.modal-bg.active,
+.edit-modal-bg.active,
+.add-modal-bg.active {
+  display: flex;
+}
+
+.modal,
+.edit-modal,
+.add-modal {
+  background: white;
+  padding: 30px;
+  border-radius: 10px;
+  width: 400px;
+}
+
+.modal input,
+.modal textarea,
+.edit-modal input,
+.edit-modal textarea,
+.add-modal input,
+.add-modal textarea {
+  width: 100%;
+  margin: 5px 0;
+}
+
+.modal-close-btn {
+  margin-top: 15px;
+}
+
 body {
   margin: 0;
   padding: 0;
@@ -142,7 +185,8 @@ body {
 }
 
 /* 수정/삭제 아이콘 */
-.edit-btn, .delete-btn {
+.edit-btn,
+.delete-btn {
   background: none;
   border: none;
   font-size: 1.2rem;
@@ -192,6 +236,7 @@ body {
     opacity: 0;
     transform: translateY(30px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);
