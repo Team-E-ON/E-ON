@@ -32,60 +32,58 @@ body {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    height: 70px;
-    border-bottom: 1px solid #eee;
-    padding: 0 40px;
+    padding: 36px 60px 0 60px;
     background: #fff;
   }
   
-  nav .logo {
-    font-size: 2rem;
-    font-weight: bold;
-    color: #295c3c;
-    letter-spacing: 2px;
-  }
+
+  .login-logo {
+    font-size: 28px;
+    font-weight: 700;
+    color: #2f5e2e;
+    letter-spacing: 1px;
+
   
-  nav .menu {
+  login-menu {
     display: flex;
     align-items: center;
-    gap: 60px;
-    font-size: 1rem;
+    gap: 40px;
+    font-size: 18px;
+    color: #aaa;
   }
   
-  nav .menu a {
-    color: #295c3c;
+  .login-menu a {
     text-decoration: none;
+    color: #999;
     font-weight: 400;
-    margin: 0 10px;
-    transition: color 0.2s;
   }
   
-  nav .menu a.active {
+  .login-menu a.active {
     color: #4ca187;
-    text-decoration: underline;
+    font-weight: 500;
   }
   
-  nav .menu a:hover {
+  .login-menu a:hover {
     color: #4ca187;
   }
   
-  nav .home-menu-right {
+ .login-menu-right {
     display: inline-flex;
     align-items: center;
-    gap: 10px;
-    margin-left: auto;
-    font-size: 0.9rem;
-    color: #888;
+    gap: 8px;
+    font-size: 14px;
+    color: #aaa;
   }
   
-  nav .home-menu-right a {
+   .login-menu-right a {
     color: #888;
     text-decoration: none;
   }
   
-  nav .home-menu-right span {
+  .login-menu-right span {
     color: #bbb;
   }
+  
   
   .login-center {
     flex: 1;
