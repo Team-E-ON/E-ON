@@ -1,3 +1,8 @@
+body {
+  margin: 0;
+  padding: 0;
+  font-family: 'Noto Sans KR', sans-serif;
+}
 
 .signup-bg {
     min-height: 100vh;
@@ -8,57 +13,62 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
-    height: 70px;
-    border-bottom: 1px solid #eee;
-    padding: 0 60px;
+    padding: 36px 60px 0 60px;
     background: #fff;
+    border-bottom: none;
   }
   
-  .logo {
-    font-size: 2rem;
-    font-weight: bold;
-    color: #295c3c;
-    letter-spacing: 2px;
-  }
+.logo {
+  font-size: 28px;
+  font-weight: 700;
+  color: #2f5e2e;
+  letter-spacing: 1px;
+}
   
-  .signup-header nav {
-    display: flex;
-    gap: 40px;
-    font-size: 1.1rem;
-    color: #aaa;
-  }
+.signup-header nav {
+  display: flex;
+  align-items: center;
+  gap: 40px;
+  font-size: 18px;
+  color: #aaa;
+  margin-left: auto;
+  margin-right: 40px;
   
-  .signup-header nav a,
-  .signup-header nav span {
-    text-decoration: none;
-    color: #aaa;
-    cursor: pointer;
-    transition: color 0.2s;
-  }
+}
+
+.signup-header nav a {
+  display: inline-flex;
+  text-decoration: none;
+  color: #999;
+  font-weight: 400;
   
-  .signup-header nav .active {
-    color: #295c3c;
-    font-weight: bold;
-  }
-  
-  .signup-header nav a:hover,
-  .user-menu a:hover {
-    color: #295c3c;
-  }
-  
-  .user-menu {
-    display: flex;
-    gap: 20px;
-    font-size: 1.1rem;
-    color: #aaa;
-    align-items: center;
-  }
-  
-  .user-menu a {
-    text-decoration: none;
-    color: #aaa;
-    transition: color 0.2s;
-  }
+}
+
+.signup-header nav a.active {
+  color: #4ca187;
+  font-weight: 500;
+}
+
+.signup-header nav a:hover {
+  color: #4ca187;
+}
+
+.user-menu {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  color: #aaa;
+}
+
+.user-menu a {
+  color: #888;
+  text-decoration: none;
+}
+
+.user-menu span {
+  color: #bbb;
+}
   
   .signup-link {
     color: #2b7a4b;
