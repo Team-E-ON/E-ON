@@ -28,7 +28,7 @@ body {
     flex-direction: column;
   }
   
-  .login-nav {
+  nav {
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -36,14 +36,15 @@ body {
     background: #fff;
   }
   
+
   .login-logo {
     font-size: 28px;
     font-weight: 700;
     color: #2f5e2e;
     letter-spacing: 1px;
-  }
+
   
-  .login-menu {
+  login-menu {
     display: flex;
     align-items: center;
     gap: 40px;
@@ -66,7 +67,7 @@ body {
     color: #4ca187;
   }
   
-  .login-menu-right {
+ .login-menu-right {
     display: inline-flex;
     align-items: center;
     gap: 8px;
@@ -74,7 +75,7 @@ body {
     color: #aaa;
   }
   
-  .login-menu-right a {
+   .login-menu-right a {
     color: #888;
     text-decoration: none;
   }
