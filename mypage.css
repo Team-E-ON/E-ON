@@ -20,38 +20,34 @@ body {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    height: 70px;
-    border-bottom: 1px solid #eee;
-    padding: 0 40px;
+    padding: 36px 60px 0 60px;
     background: #fff;
   }
   
   .mypage-logo {
-    font-size: 2rem;
-    font-weight: bold;
-    color: #295c3c;
-    letter-spacing: 2px;
+    font-size: 28px;
+    font-weight: 700;
+    color: #2f5e2e;
+    letter-spacing: 1px;
   }
   
   .mypage-menu {
     display: flex;
     align-items: center;
-    gap: 60px;
-    font-size: 1rem;
-    color: #295c3c;
+    gap: 40px;
+    font-size: 18px;
+    color: #aaa;
   }
   
   .mypage-menu a {
-    color: #295c3c;
     text-decoration: none;
+    color: #999;
     font-weight: 400;
-    margin: 0 10px;
-    transition: color 0.2s;
   }
   
   .mypage-menu a.active {
     color: #4ca187;
-    text-decoration: underline;
+    font-weight: 500;
   }
   
   .mypage-menu a:hover {
@@ -61,11 +57,20 @@ body {
   .mypage-menu-right {
     display: inline-flex;
     align-items: center;
-    gap: 10px;
-    margin-left: auto;
-    color: #888;
-    font-size: 0.9rem;
+    gap: 8px;
+    font-size: 14px;
+    color: #aaa;
   }
+  
+  .mypage-menu-right a {
+    color: #888;
+    text-decoration: none;
+  }
+  
+  .mypage-menu-right span {
+    color: #bbb;
+  }
+  
   
   .mypage-content {
     display: flex;
