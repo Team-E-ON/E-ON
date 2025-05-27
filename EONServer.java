@@ -24,7 +24,7 @@ public class EONServer {
 
     static final String DB_URL = "jdbc:mysql://localhost/DB2025Team06";
     static final String USER = "DB2025Team06";
-    static final String PASS = "anna0715";
+    static final String PASS = "DB2025Team06";
 
     // 세션 ID → 사용자 ID 매핑
     private static final Map<String, String> sessionMap = new HashMap<>();
@@ -692,22 +692,6 @@ public class EONServer {
     }
 
     private static void handleScheduleAdmin(HttpExchange exchange) throws IOException {
-        String role = getUserRoleFromCookie(exchange);
-        if (!"admin".equals(role)) {
-            exchange.sendResponseHeaders(403, -1); // 접근 금지
-            return;
-        }
-
-        String html = new String(Files.readAllBytes(new File("schedule_admin.html").toPath()));
-        exchange.getResponseHeaders().add("Content-Type", "text/html; charset=utf-8");
-        exchange.sendResponseHeaders(200, html.getBytes().length);
-        try (OutputStream os = exchange.getResponseBody()) {
-            os.write(html.getBytes());
-        }
-    }
-
-
-    private static void handleSchedule(HttpExchange exchange) throws IOException {
         String id = "101"; // 실제에선 GET 쿼리 파라미터 처리 가능
         System.out.println("Working dir: " + new File(".").getAbsolutePath());
         String html = new String(Files.readAllBytes(new File("schedule_admin.html").toPath()));
