@@ -7,6 +7,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
+import java.io.UnsupportedEncodingException;
 import java.net.InetSocketAddress;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
@@ -26,9 +27,9 @@ import java.util.UUID;
 
 public class EONServer {
 
-    static final String DB_URL = "jdbc:mysql://localhost/db2025_eon";
-    static final String USER = "root";
-    static final String PASS = "";
+    static final String DB_URL = "jdbc:mysql://localhost/DB2025Team06";
+    static final String USER = "DB2025Team06";
+    static final String PASS = "DB2025Team06";
 
     // ★ 세션 ID → 사용자 이름 매핑
     private static final Map<String, String> sessionMap = new HashMap<>();
@@ -48,12 +49,16 @@ public class EONServer {
         server.createContext("/signup.html", ex -> serveStaticFile(ex, "signup.html", "text/html"));
         server.createContext("/login", EONServer::handleLogin);
         server.createContext("/signup", EONServer::handleSignup);
+        server.createContext("/logout", EONServer::handleLogout);
 
         server.createContext("/Home.css", ex -> serveStaticFile(ex, "Home.css", "text/css"));
         server.createContext("/mypage.css", ex -> serveStaticFile(ex, "mypage.css", "text/css"));
         server.createContext("/login.css", ex -> serveStaticFile(ex, "login.css", "text/css"));
         server.createContext("/signup.css", ex -> serveStaticFile(ex, "signup.css", "text/css"));
-        server.createContext("/Home.js", ex -> serveStaticFile(ex, "Home.js", "application/javascript")); // JS 서빙
+
+        server.createContext("/mypage.html/change-password", EONServer::handleChangePassword);
+        server.createContext("/mypage.html/delete-user", EONServer::handleDeleteUser);
+        server.createContext("/Home.js", ex -> serveStaticFile(ex, "Home.js", "application/javascript"));
         server.setExecutor(null);
         server.start();
         System.out.println("서버 실행 중: http://localhost:8080");
@@ -320,20 +325,17 @@ public class EONServer {
             e.printStackTrace();
         }
 
-        String res;
-        if (success && name != null) {
+        if (success) {
             String sessionId = UUID.randomUUID().toString();
             sessionMap.put(sessionId, name);
             exchange.getResponseHeaders().add("Set-Cookie", "sessionId=" + sessionId + "; Path=/");
-            res = "{\"success\": true}";
+            exchange.getResponseHeaders().add("Location", "/home");
+            exchange.sendResponseHeaders(302, -1); // 리디렉션
         } else {
-            res = "{\"success\": false}";
+            exchange.getResponseHeaders().add("Location", "/login.html");
+            exchange.sendResponseHeaders(302, -1); // 로그인 실패 시 다시 로그인 페이지로
         }
-
-        exchange.sendResponseHeaders(200, res.getBytes().length);
-        OutputStream os = exchange.getResponseBody();
-        os.write(res.getBytes());
-        os.close();
+        exchange.close();
     }
 
 
@@ -457,5 +459,152 @@ public class EONServer {
             ps.setLong(3, clubId);
             ps.executeUpdate();
         }
+    }
+
+    private static void handleChangePassword(HttpExchange exchange) throws IOException {
+        if (!exchange.getRequestMethod().equalsIgnoreCase("POST")) {
+            exchange.sendResponseHeaders(405, -1);
+            return;
+        }
+
+        String body = new BufferedReader(new InputStreamReader(exchange.getRequestBody(), StandardCharsets.UTF_8))
+                .lines().reduce("", (acc, line) -> acc + line);
+        Map<String, String> params = parseQuery(body);
+
+        String oldPassword = params.get("oldPassword");
+        String newPassword = params.get("newPassword");
+        String userId = params.get("userId");
+
+        if (oldPassword == null || newPassword == null || userId == null) {
+            exchange.sendResponseHeaders(400, -1);
+            return;
+        }
+
+        String queryCheck = "SELECT password FROM DB2025_USER WHERE id = ?";
+        String queryUpdate = "UPDATE DB2025_USER SET password = ? WHERE id = ?";
+
+        try (Connection conn = DriverManager.getConnection(DB_URL, USER, PASS);
+             PreparedStatement stmtCheck = conn.prepareStatement(queryCheck)) {
+
+            stmtCheck.setString(1, userId);
+            ResultSet rs = stmtCheck.executeQuery();
+
+            if (rs.next()) {
+                String currentPassword = rs.getString("password");
+
+                if (!currentPassword.equals(oldPassword)) {
+                    // 기존 비밀번호 불일치
+                    exchange.sendResponseHeaders(401, -1);
+                    return;
+                }
+
+                // 비밀번호 변경
+                try (PreparedStatement stmtUpdate = conn.prepareStatement(queryUpdate)) {
+                    stmtUpdate.setString(1, newPassword);
+                    stmtUpdate.setString(2, userId);
+                    int updated = stmtUpdate.executeUpdate();
+
+                    if (updated > 0) {
+                        exchange.sendResponseHeaders(200, -1);
+                    } else {
+                        exchange.sendResponseHeaders(500, -1);
+                    }
+                }
+            } else {
+                // 사용자 없음
+                exchange.sendResponseHeaders(404, -1);
+            }
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+            exchange.sendResponseHeaders(500, -1);
+        }
+    }
+
+    private static Map<String, String> parseQuery(String query) throws UnsupportedEncodingException {
+        Map<String, String> map = new HashMap<>();
+        for (String param : query.split("&")) {
+            String[] pair = param.split("=", 2);
+            if (pair.length == 2) {
+                map.put(URLDecoder.decode(pair[0], "UTF-8"), URLDecoder.decode(pair[1], "UTF-8"));
+            }
+        }
+        return map;
+    }
+
+    private static void handleDeleteUser(HttpExchange exchange) throws IOException {
+        if (!exchange.getRequestMethod().equalsIgnoreCase("POST")) {
+            exchange.sendResponseHeaders(405, -1);
+            return;
+        }
+
+        String loggedInUserId = getUserIdFromCookie(exchange); // 현재 로그인된 사용자 ID 가져오기
+        if (loggedInUserId == null) {
+            exchange.getResponseHeaders().add("Location", "/login.html");
+            exchange.sendResponseHeaders(302, -1);
+            return;
+        }
+
+        String body = new BufferedReader(new InputStreamReader(exchange.getRequestBody(), StandardCharsets.UTF_8))
+                .lines().reduce("", (acc, line) -> acc + line);
+
+        Map<String, String> params = parseQuery(body);
+        String userIdToDelete = params.get("userId"); // 요청 본문에서 탈퇴할 사용자 ID 가져오기
+
+        if (userIdToDelete == null) {
+            exchange.sendResponseHeaders(400, -1);
+            return;
+        }
+
+        // 로그인된 사용자와 탈퇴 요청 사용자 ID가 일치하는지 확인
+        if (!loggedInUserId.equals(userIdToDelete)) {
+            exchange.sendResponseHeaders(403, -1); // 권한 없음
+            return;
+        }
+
+        String query = "DELETE FROM DB2025_USER WHERE id = ?";
+
+        try (Connection conn = DriverManager.getConnection(DB_URL, USER, PASS);
+             PreparedStatement stmt = conn.prepareStatement(query)) {
+            stmt.setString(1, userIdToDelete); // 일치하는 사용자 ID 사용
+            int deleted = stmt.executeUpdate();
+
+            if (deleted > 0) {
+                // 회원 탈퇴 성공 시 세션도 만료
+                exchange.getResponseHeaders()
+                        .add("Set-Cookie", "sessionId=; Path=/; Expires=Thu, 01 Jan 1970 00:00:00 GMT");
+                sessionMap.remove(loggedInUserId); // 세션 맵에서도 제거
+                exchange.sendResponseHeaders(200, -1);
+            } else {
+                exchange.sendResponseHeaders(404, -1);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+            exchange.sendResponseHeaders(500, -1);
+        }
+    }
+
+    private static void handleLogout(HttpExchange exchange) throws IOException {
+        // 클라이언트에게 sessionId 쿠키를 삭제하도록 지시
+        exchange.getResponseHeaders().add("Set-Cookie", "sessionId=; Path=/; Expires=Thu, 01 Jan 1970 00:00:00 GMT");
+
+        // 세션 맵에서 해당 세션 ID 제거 (선택 사항이지만 보안 강화에 도움)
+        List<String> cookies = exchange.getRequestHeaders().get("Cookie");
+        if (cookies != null) {
+            for (String cookie : cookies) {
+                for (String pair : cookie.split(";")) {
+                    String[] kv = pair.trim().split("=");
+                    if (kv.length == 2 && kv[0].equals("sessionId")) {
+                        sessionMap.remove(kv[1]);
+                        break;
+                    }
+                }
+            }
+        }
+
+        // 로그인 페이지로 리디렉션
+        exchange.getResponseHeaders().add("Location", "/login.html");
+        exchange.sendResponseHeaders(302, -1);
+        exchange.close();
     }
 }
