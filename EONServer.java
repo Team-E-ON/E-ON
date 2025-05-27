@@ -79,6 +79,8 @@ public class EONServer {
         server.createContext("/schedule", EONServer::handleSchedulePage);  // 👈 이거 추가!
         server.createContext("/schedule_user.html", ex -> serveStaticFile(ex, "schedule_user.html", "text/html"));
 
+        server.createContext("/event/like", EONServer::handleEventLike);
+
 
         server.setExecutor(null);
         server.start();
@@ -107,6 +109,45 @@ public class EONServer {
         }
         return null;
     }
+
+    private static void handleEventLike(HttpExchange exchange) throws IOException {
+        if (!exchange.getRequestMethod().equalsIgnoreCase("POST")) {
+            exchange.sendResponseHeaders(405, -1);
+            return;
+        }
+
+        String userId = getUserIdFromCookie(exchange);
+        if (userId == null) {
+            exchange.sendResponseHeaders(401, -1); // 로그인 안 된 사용자
+            return;
+        }
+
+        String body = new BufferedReader(new InputStreamReader(exchange.getRequestBody(), StandardCharsets.UTF_8))
+                .lines().reduce("", (acc, line) -> acc + line);
+
+        Map<String, String> params = queryToMap(body);
+        String eventIdStr = params.get("eventId");
+        if (eventIdStr == null) {
+            exchange.sendResponseHeaders(400, -1);
+            return;
+        }
+
+        int eventId = Integer.parseInt(eventIdStr);
+
+        // DB2025_EVENT_LIKE 테이블에 INSERT
+        try (Connection conn = DriverManager.getConnection(DB_URL, USER, PASS);
+             PreparedStatement stmt = conn.prepareStatement(
+                     "INSERT IGNORE INTO DB2025_EVENT_LIKE (user_id, event_id) VALUES (?, ?)")) {
+            stmt.setString(1, userId);
+            stmt.setInt(2, eventId);
+            stmt.executeUpdate();
+            exchange.sendResponseHeaders(200, -1);
+        } catch (SQLException e) {
+            e.printStackTrace();
+            exchange.sendResponseHeaders(500, -1);
+        }
+    }
+
 
     private static void handleHome(HttpExchange exchange) throws IOException {
         String userId = getUserIdFromCookie(exchange);
