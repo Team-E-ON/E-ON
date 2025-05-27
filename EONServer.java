@@ -29,7 +29,7 @@ public class EONServer {
 
     static final String DB_URL = "jdbc:mysql://localhost/DB2025Team06";
     static final String USER = "DB2025Team06";
-    static final String PASS = "anna0715";
+    static final String PASS = "DB2025Team06";
 
     // 세션 ID → 사용자 ID 매핑
     private static final Map<String, String> sessionMap = new HashMap<>();
@@ -893,12 +893,10 @@ public class EONServer {
     }
 
     private static void handleDeleteEvent(HttpExchange exchange) throws IOException {
-        System.out.println("ddd");
         if (!"POST".equalsIgnoreCase(exchange.getRequestMethod())) {
             exchange.sendResponseHeaders(405, -1); // Method Not Allowed
             return;
         }
-        System.out.println("ddd");
 
         InputStreamReader isr = new InputStreamReader(exchange.getRequestBody(), StandardCharsets.UTF_8);
         BufferedReader br = new BufferedReader(isr);
@@ -932,7 +930,6 @@ public class EONServer {
             }
             return;
         }
-        System.out.println("ddd");
 
         // DB 연결 및 삭제 쿼리 실행
         try (Connection conn = DriverManager.getConnection(DB_URL, USER, PASS)) {
@@ -962,8 +959,6 @@ public class EONServer {
                 os.write(response.getBytes(StandardCharsets.UTF_8));
             }
         }
-
-        System.out.println("ddd");
     }
 
     private static Map<String, String> queryToMap(String query) {
