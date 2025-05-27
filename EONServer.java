@@ -689,20 +689,10 @@ public class EONServer {
     }
 
     private static void handleScheduleAdmin(HttpExchange exchange) throws IOException {
-        String id = "101"; // 실제에선 GET 쿼리 파라미터 처리 가능
         System.out.println("Working dir: " + new File(".").getAbsolutePath());
         String html = new String(Files.readAllBytes(new File("schedule_admin.html").toPath()));
         String name = "", major = "", subMajors = "", clubs = "";
         String departmentHtml = "", clubHtml = "";
-
-        String userQuery = "SELECT u.name, u.id, " + "CONCAT_WS(' ', d_major.name, d_major.college_name) AS major, "
-                + "(SELECT GROUP_CONCAT(CONCAT_WS(' ', d.name, d.college_name) SEPARATOR ', ') "
-                + " FROM DB2025_USER_DEPARTMENT ud JOIN DB2025_DEPARTMENT d ON ud.department_id = d.id "
-                + " WHERE ud.user_id = u.id AND ud.major_type = 'minor') AS sub_majors, "
-                + "(SELECT GROUP_CONCAT(c.name SEPARATOR ', ') FROM DB2025_USER_CLUB uc "
-                + " JOIN DB2025_CLUB c ON uc.club_id = c.id WHERE uc.user_id = u.id) AS clubs " + "FROM DB2025_USER u "
-                + "LEFT JOIN DB2025_USER_DEPARTMENT ud_major ON u.id = ud_major.user_id AND ud_major.major_type = 'major' "
-                + "LEFT JOIN DB2025_DEPARTMENT d_major ON ud_major.department_id = d_major.id " + "WHERE u.id = ?";
 
         String departmentEventQuery = "SELECT e.id, d.name, d.college_name, e.title, e.date, e.content "
                 + "FROM DB2025_EVENT e " + "JOIN DB2025_DEPARTMENT d ON e.ref_id = d.id "
@@ -712,18 +702,6 @@ public class EONServer {
                 + "JOIN DB2025_CLUB c ON e.ref_id = c.id " + "WHERE e.type = 'club' " + "ORDER BY c.name, e.date";
 
         try (Connection conn = DriverManager.getConnection(DB_URL, USER, PASS)) {
-            // 사용자 정보
-            try (PreparedStatement stmt = conn.prepareStatement(userQuery)) {
-                stmt.setString(1, id);
-                ResultSet rs = stmt.executeQuery();
-                if (rs.next()) {
-                    name = rs.getString("name");
-                    major = rs.getString("major");
-                    subMajors = rs.getString("sub_majors");
-                    clubs = rs.getString("clubs");
-                }
-            }
-
             // 학과별 이벤트 HTML 구성
             try (PreparedStatement stmt = conn.prepareStatement(departmentEventQuery)) {
                 ResultSet rs = stmt.executeQuery();
@@ -783,8 +761,7 @@ public class EONServer {
         }
 
         // HTML 템플릿에서 치환
-        html = html.replace("{{name}}", name).replace("{{id}}", id).replace("{{major}}", major != null ? major : "없음")
-                .replace("{{subMajors}}", subMajors != null ? subMajors : "없음")
+        html = html.replace("{{subMajors}}", subMajors != null ? subMajors : "없음")
                 .replace("{{clubs}}", clubs != null ? clubs : "없음").replace("{{departmentGroups}}", departmentHtml)
                 .replace("{{clubGroups}}", clubHtml);
 
