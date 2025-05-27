@@ -18,7 +18,12 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.LocalDate;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
 
 public class EONServer {
 
@@ -55,7 +60,6 @@ public class EONServer {
         server.createContext("/mypage.html/change-password", EONServer::handleChangePassword);
         server.createContext("/mypage.html/delete-user", EONServer::handleDeleteUser);
 
-
         // ★ 관리자 일정 관리 페이지 (Server, ScheduleServer의 기능 통합)
         server.createContext("/scheduleadmin", EONServer::handleScheduleAdmin);       // 관리자 전용
         server.createContext("/scheduleadmin/groups", EONServer::handleScheduleGroups); // 학과/동아리 목록
@@ -72,7 +76,6 @@ public class EONServer {
             exchange.getResponseBody().write(cssBytes);
             exchange.close();
         });
-
 
         server.setExecutor(null);
         server.start();
@@ -125,11 +128,10 @@ public class EONServer {
             Map<Integer, List<String>> eventsByDay = new HashMap<>();
             String eventQuery = """
                         SELECT DAY(date) AS day, title, type
-                        FROM DB2025_EVENT e
-                        JOIN DB2025_EVENT_LIKE l ON e.id = l.event_id
-                        WHERE l.user_id = ?
-                          AND MONTH(date) = MONTH(CURRENT_DATE)
-                          AND YEAR(date) = YEAR(CURRENT_DATE)
+                        FROM DB2025_LIKED_EVENTS_VIEW
+                        WHERE user_id = ?
+                        AND MONTH(date) = MONTH(CURRENT_DATE)
+                        AND YEAR(date) = YEAR(CURRENT_DATE)
                     """;
             try (PreparedStatement stmt = conn.prepareStatement(eventQuery)) {
                 stmt.setString(1, userId);
@@ -149,12 +151,11 @@ public class EONServer {
             }
 
             String ddayQuery = """
-                        SELECT e.title, DATEDIFF(e.date, CURRENT_DATE) AS d_day, e.type
-                        FROM DB2025_EVENT e
-                        JOIN DB2025_EVENT_LIKE l ON e.id = l.event_id
-                        WHERE l.user_id = ?
-                          AND e.date >= CURRENT_DATE
-                        ORDER BY e.date
+                        SELECT title, DATEDIFF(date, CURRENT_DATE) AS d_day, type
+                        FROM DB2025_LIKED_EVENTS_VIEW
+                        WHERE user_id = ?
+                          AND date >= CURRENT_DATE
+                        ORDER BY date
                     """;
             try (PreparedStatement stmt = conn.prepareStatement(ddayQuery)) {
                 stmt.setString(1, userId);
@@ -239,22 +240,9 @@ public class EONServer {
         String name = "", major = "", subMajors = "", clubs = "";
 
         String query = """
-                    SELECT u.name, u.id,
-                           CONCAT_WS(' ', d_major.name, d_major.college_name) AS major,
-                           (SELECT GROUP_CONCAT(CONCAT_WS(' ', d.name, d.college_name) SEPARATOR ', ')
-                            FROM DB2025_USER_DEPARTMENT ud
-                            JOIN DB2025_DEPARTMENT d ON ud.department_id = d.id
-                            WHERE ud.user_id = u.id AND ud.major_type = 'minor') AS sub_majors,
-                           (SELECT GROUP_CONCAT(c.name SEPARATOR ', ')
-                            FROM DB2025_USER_CLUB uc
-                            JOIN DB2025_CLUB c ON uc.club_id = c.id
-                            WHERE uc.user_id = u.id) AS clubs
-                    FROM DB2025_USER u
-                    LEFT JOIN DB2025_USER_DEPARTMENT ud_major
-                      ON u.id = ud_major.user_id AND ud_major.major_type = 'major'
-                    LEFT JOIN DB2025_DEPARTMENT d_major
-                      ON ud_major.department_id = d_major.id
-                    WHERE u.id = ?
+                    SELECT name, id, major, minors AS sub_majors, clubs
+                    FROM DB2025_USER_SUMMARY_VIEW
+                    WHERE id = ?
                 """;
 
         try (Connection conn = DriverManager.getConnection(DB_URL, USER, PASS);
@@ -710,8 +698,9 @@ public class EONServer {
                 while (rs.next()) {
                     String deptName = rs.getString("name") + " (" + rs.getString("college_name") + ")";
                     if (!deptName.equals(currentDepartment)) {
-                        if (!currentDepartment.isEmpty())
+                        if (!currentDepartment.isEmpty()) {
                             sb.append("</div>"); // 이전 블록 닫기
+                        }
                         currentDepartment = deptName;
                         sb.append("<h2>").append(deptName).append("</h2><div class=\"schedule-group\">");
                     }
@@ -724,8 +713,9 @@ public class EONServer {
                             .append("<button class=\"edit-btn\">✎</button>")
                             .append("<button class=\"delete-btn\">🗑</button>").append("</span>").append("</div>");
                 }
-                if (!currentDepartment.isEmpty())
+                if (!currentDepartment.isEmpty()) {
                     sb.append("</div>");
+                }
                 departmentHtml = sb.toString();
             }
 
@@ -737,8 +727,9 @@ public class EONServer {
                 while (rs.next()) {
                     String clubName = rs.getString("name");
                     if (!clubName.equals(currentClub)) {
-                        if (!currentClub.isEmpty())
+                        if (!currentClub.isEmpty()) {
                             sb.append("</div>");
+                        }
                         currentClub = clubName;
                         sb.append("<h2>").append(clubName).append("</h2><div class=\"schedule-group\">");
                     }
@@ -751,8 +742,9 @@ public class EONServer {
                             .append("<button class=\"edit-btn\">✎</button>")
                             .append("<button class=\"delete-btn\">🗑</button>").append("</span>").append("</div>");
                 }
-                if (!currentClub.isEmpty())
+                if (!currentClub.isEmpty()) {
                     sb.append("</div>");
+                }
                 clubHtml = sb.toString();
             }
 
@@ -881,8 +873,9 @@ public class EONServer {
 
     private static Map<String, String> parseFormData(String formData) throws UnsupportedEncodingException {
         Map<String, String> map = new HashMap<>();
-        if (formData == null || formData.isEmpty())
+        if (formData == null || formData.isEmpty()) {
             return map;
+        }
 
         String[] pairs = formData.split("&");
         for (String pair : pairs) {
@@ -972,8 +965,9 @@ public class EONServer {
 
     private static Map<String, String> queryToMap(String query) {
         Map<String, String> result = new HashMap<>();
-        if (query == null || query.isEmpty())
+        if (query == null || query.isEmpty()) {
             return result;
+        }
         String[] pairs = query.split("&");
         for (String pair : pairs) {
             int idx = pair.indexOf("=");
