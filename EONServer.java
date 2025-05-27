@@ -72,6 +72,21 @@ public class EONServer {
         exchange.close();
     }
 
+    private static String getUserIdFromCookie(HttpExchange exchange) {
+        List<String> cookies = exchange.getRequestHeaders().get("Cookie");
+        if (cookies != null) {
+            for (String cookie : cookies) {
+                for (String pair : cookie.split(";")) {
+                    String[] kv = pair.trim().split("=");
+                    if (kv.length == 2 && kv[0].equals("sessionId")) {
+                        return sessionMap.get(kv[1]);
+                    }
+                }
+            }
+        }
+        return null;
+    }
+
     // ★ 사용자 이름을 쿠키에서 가져오기
     private static String getUserNameFromCookie(HttpExchange exchange) {
         List<String> cookies = exchange.getRequestHeaders().get("Cookie");
@@ -227,7 +242,8 @@ public class EONServer {
     }
 
     private static void handleMypage(HttpExchange exchange) throws IOException {
-        String id = getUserNameFromCookie(exchange);
+        String id = getUserIdFromCookie(exchange);
+        System.out.println(id);
         if (id == null) {
             exchange.getResponseHeaders().add("Location", "/login.html");
             exchange.sendResponseHeaders(302, -1);
@@ -269,6 +285,7 @@ public class EONServer {
             os.write(html.getBytes());
         }
     }
+
     private static void handleLogin(HttpExchange exchange) throws IOException {
         // ✅ CORS Preflight 요청 처리
         if ("OPTIONS".equalsIgnoreCase(exchange.getRequestMethod())) {
