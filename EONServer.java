@@ -26,9 +26,9 @@ import java.util.UUID;
 
 public class EONServer {
 
-    static final String DB_URL = "jdbc:mysql://localhost/DB2025Team06";
-    static final String USER = "DB2025Team06";
-    static final String PASS = "DB2025Team06";
+    static final String DB_URL = "jdbc:mysql://localhost/3306";
+    static final String USER = "root";
+    static final String PASS = "xuaz0606";
 
     // 세션 ID → 사용자 ID 매핑
     private static final Map<String, String> sessionMap = new HashMap<>();

@@ -1,4 +1,6 @@
-
+body {
+  font-family: 'Noto Sans KR', sans-serif;
+}
 .signup-bg {
     min-height: 100vh;
     background: #fff;
@@ -8,56 +10,55 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
-    height: 70px;
-    border-bottom: 1px solid #eee;
-    padding: 0 60px;
+    padding: 36px 60px 0 60px;
     background: #fff;
   }
   
   .logo {
-    font-size: 2rem;
-    font-weight: bold;
-    color: #295c3c;
-    letter-spacing: 2px;
+    font-size: 28px;
+    font-weight: 700;
+    color: #2f5e2e;
+    letter-spacing: 1px;
   }
   
   .signup-header nav {
     display: flex;
+    align-items: center;
     gap: 40px;
-    font-size: 1.1rem;
+    font-size: 18px;
     color: #aaa;
   }
   
-  .signup-header nav a,
-  .signup-header nav span {
+  .signup-header nav a {
     text-decoration: none;
-    color: #aaa;
-    cursor: pointer;
-    transition: color 0.2s;
+    color: #999;
+    font-weight: 400;
   }
   
   .signup-header nav .active {
-    color: #295c3c;
-    font-weight: bold;
+    color: #4ca187;
+    font-weight: 500;
   }
   
-  .signup-header nav a:hover,
-  .user-menu a:hover {
-    color: #295c3c;
+  .signup-header nav a:hover {
+    color: #4ca187;
   }
   
   .user-menu {
-    display: flex;
-    gap: 20px;
-    font-size: 1.1rem;
-    color: #aaa;
+    display: inline-flex;
     align-items: center;
+    gap: 8px;
+    font-size: 14px;
+    color: #aaa;
   }
   
   .user-menu a {
+    color: #888;
     text-decoration: none;
-    color: #aaa;
-    transition: color 0.2s;
+  }
+  
+  .user-menu span {
+    color: #bbb;
   }
   
   .signup-link {
@@ -192,4 +193,87 @@
   .submit-btn:hover {
     background: #1d3e2a;
   }
-  
+
+
+/* 공통 네비게이션 */
+nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 36px 60px 0 60px;
+  background: #fff;
+}
+
+/* 로고 */
+nav .home-logo,
+nav .login-logo,
+nav .mypage-logo,
+.signup-header .logo {
+  font-size: 28px;
+  font-weight: 700;
+  color: #2f5e2e;
+  letter-spacing: 1px;
+}
+
+/* 메뉴 */
+nav .home-menu,
+nav .login-menu,
+nav .mypage-menu,
+.signup-header nav {
+  display: flex;
+  align-items: center;
+  gap: 40px;
+  font-size: 18px;
+  color: #aaa;
+}
+
+nav .home-menu a,
+nav .login-menu a,
+nav .mypage-menu a,
+.signup-header nav a {
+  text-decoration: none;
+  color: #999;
+  font-weight: 400;
+}
+
+nav .home-menu a.active,
+nav .login-menu a.active,
+nav .mypage-menu a.active,
+.signup-header nav .active {
+  color: #4ca187;
+  font-weight: 500;
+}
+
+nav .home-menu a:hover,
+nav .login-menu a:hover,
+nav .mypage-menu a:hover,
+.signup-header nav a:hover {
+  color: #4ca187;
+}
+
+/* 우측 메뉴 */
+nav .home-menu-right,
+nav .login-menu-right,
+nav .mypage-menu-right,
+.signup-header .user-menu {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  color: #aaa;
+}
+
+nav .home-menu-right a,
+nav .login-menu-right a,
+nav .mypage-menu-right a,
+.signup-header .user-menu a {
+  color: #888;
+  text-decoration: none;
+}
+
+nav .home-menu-right span,
+nav .login-menu-right span,
+nav .mypage-menu-right span,
+.signup-header .user-menu span {
+  color: #bbb;
+}

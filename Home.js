@@ -1,3 +1,5 @@
+
+
 const weekDays = ["Mon", "Tue", "Wed", "Thur", "Fri", "Sat", "Sun"];
 const calendarHead = document.getElementById("calendar-head");
 const calendarBody = document.getElementById("calendar-body");
