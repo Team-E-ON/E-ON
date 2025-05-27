@@ -72,6 +72,9 @@ public class EONServer {
             exchange.getResponseBody().write(cssBytes);
             exchange.close();
         });
+        server.createContext("/schedule", EONServer::handleSchedulePage);  // 👈 이거 추가!
+        server.createContext("/schedule_user.html", ex -> serveStaticFile(ex, "schedule_user.html", "text/html"));
+
 
 
         server.setExecutor(null);
