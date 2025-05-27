@@ -5,56 +5,47 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>홈 - E: ON</title>
   <link rel="stylesheet" href="Home.css" />
-</head>
+  <script defer src="Home.js"></script>
 <body>
 <div class="home-bg">
   <div class="home-wrap">
 
     <!-- 상단 네비게이션 -->
-    <nav class="home-nav">
-      <div class="home-logo">E: ON</div>
-      <div class="home-menu">
-        <a href="#" class="active">홈</a>
+    <nav>
+      <div class="logo">E: ON</div>
+      <div class="menu">
+        <a href="Home.html">홈</a>
         <a href="schedule_user.html">일정목록</a>
         <a href="mypage.html">마이페이지</a>
-        <div class="home-menu-right">
+        <div class="menu-right">
           <a href="login.html">로그인</a>
           <span>|</span>
           <a href="signup.html">회원가입</a>
         </div>
       </div>
     </nav>
+    
 
     <!-- 본문 -->
     <main class="home-main">
       <!-- D-day 섹션 -->
       <section class="home-left">
         <div class="dday-title">D-day</div>
-        <ul class="dday-list">
-          {{ddayList}}
+        <ul id="dday-list" class="dday-list">
+          <!-- JS로 동적 삽입 -->
         </ul>
       </section>
 
       <!-- 달력 섹션 -->
       <section class="home-calendar">
         <div class="calendar-header">
-          <span class="calendar-title">{{calendarTitle}}</span>
+          <span id="calendar-title" class="calendar-title">Loading...</span>
         </div>
         <table class="calendar-table">
           <thead>
-          <tr>
-            <th>Mon</th>
-            <th>Tue</th>
-            <th>Wed</th>
-            <th>Thu</th>
-            <th>Fri</th>
-            <th>Sat</th>
-            <th>Sun</th>
-          </tr>
+            <tr id="calendar-head"></tr> <!-- 요일 들어갈 자리 -->
           </thead>
-          <tbody>
-          {{calendarTable}}
-          </tbody>
+          <tbody id="calendar-body"></tbody> <!-- 날짜들 들어갈 자리 -->
         </table>
       </section>
     </main>

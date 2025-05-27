@@ -24,61 +24,66 @@ body {
     flex-direction: column;
   }
   
-  /* 네비게이션 */
-  .home-nav {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 36px 60px 0 60px;
-  }
-  
-  .home-logo {
-    font-size: 28px;
-    font-weight: 700;
-    color: #2f5e2e;
-    letter-spacing: 1px;
-  }
-  
-  .home-menu {
-    display: flex;
-    align-items: center;
-    gap: 40px;
-    font-size: 18px;
-    color: #aaa;
-  }
-  
-  .home-menu a {
-    text-decoration: none;
-    color: #999;
-    font-weight: 400;
-  }
-  
-  .home-menu a.active {
-    color: #4ca187;
-    font-weight: 500;
-  }
-  
-  .home-menu a:hover {
-    color: #4ca187;
-  }
-  
-  .home-menu-right {
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    font-size: 14px;
-    color: #aaa;
-  }
-  
-  .home-menu-right a {
-    color: #888;
-    text-decoration: none;
-  }
-  
-  .home-menu-right span {
-    color: #bbb;
-  }
-  
+  /* ✅ 공통 배너 스타일 */
+nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 70px;
+  border-bottom: 1px solid #eee;
+  padding: 0 40px;
+  background: #fff;
+}
+
+nav .logo {
+  font-size: 2rem;
+  font-weight: bold;
+  color: #295c3c;
+  letter-spacing: 2px;
+}
+
+nav .menu {
+  display: flex;
+  align-items: center;
+  gap: 60px;
+  font-size: 1rem;
+}
+
+nav .menu a {
+  color: #295c3c;
+  text-decoration: none;
+  font-weight: 400;
+  margin: 0 10px;
+  transition: color 0.2s;
+}
+
+nav .menu a.active {
+  color: #4ca187;
+  text-decoration: underline;
+}
+
+nav .menu a:hover {
+  color: #4ca187;
+}
+
+nav .menu-right {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  margin-left: auto;
+  font-size: 0.9rem;
+  color: #888;
+}
+
+nav .menu-right a {
+  color: #888;
+  text-decoration: none;
+}
+
+nav .menu-right span {
+  color: #bbb;
+}
+
   /* 메인 레이아웃 */
   .home-main {
     display: flex;

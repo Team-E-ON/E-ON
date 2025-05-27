@@ -23,13 +23,14 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
+
 public class EONServer {
 
     static final String DB_URL = "jdbc:mysql://localhost/db2025_eon";
     static final String USER = "root";
     static final String PASS = "";
 
-    // 세션 ID → 사용자 ID 매핑
+    // ★ 세션 ID → 사용자 이름 매핑
     private static final Map<String, String> sessionMap = new HashMap<>();
 
     public static void main(String[] args) throws IOException {
@@ -37,7 +38,7 @@ public class EONServer {
 
         server.createContext("/", exchange -> {
             exchange.getResponseHeaders().add("Location", "/home");
-            exchange.sendResponseHeaders(302, -1); // 302 Found 리디렉션
+            exchange.sendResponseHeaders(302, -1);
             exchange.close();
         });
 
@@ -52,6 +53,7 @@ public class EONServer {
         server.createContext("/mypage.css", ex -> serveStaticFile(ex, "mypage.css", "text/css"));
         server.createContext("/login.css", ex -> serveStaticFile(ex, "login.css", "text/css"));
         server.createContext("/signup.css", ex -> serveStaticFile(ex, "signup.css", "text/css"));
+        server.createContext("/Home.js", ex -> serveStaticFile(ex, "Home.js", "application/javascript")); // JS 서빙
         server.setExecutor(null);
         server.start();
         System.out.println("서버 실행 중: http://localhost:8080");
@@ -65,7 +67,8 @@ public class EONServer {
         exchange.close();
     }
 
-    private static String getUserIdFromCookie(HttpExchange exchange) {
+    // ★ 사용자 이름을 쿠키에서 가져오기
+    private static String getUserNameFromCookie(HttpExchange exchange) {
         List<String> cookies = exchange.getRequestHeaders().get("Cookie");
         if (cookies != null) {
             for (String cookie : cookies) {
@@ -81,8 +84,8 @@ public class EONServer {
     }
 
     private static void handleHome(HttpExchange exchange) throws IOException {
-        String userId = getUserIdFromCookie(exchange);
-        if (userId == null) {
+        String userName = getUserNameFromCookie(exchange); // ★ 이름으로 바꿈
+        if (userName == null) {
             exchange.getResponseHeaders().add("Location", "/login.html");
             exchange.sendResponseHeaders(302, -1);
             return;
@@ -92,14 +95,33 @@ public class EONServer {
         StringBuilder ddayItems = new StringBuilder();
         StringBuilder calendarTable = new StringBuilder();
 
+        // ★ 사용자 ID를 얻기 위해 이름 → ID 변환
+        String userId = null;
+        try (Connection conn = DriverManager.getConnection(DB_URL, USER, PASS);
+             PreparedStatement stmt = conn.prepareStatement("SELECT id FROM DB2025_USER WHERE name = ?")) {
+            stmt.setString(1, userName);
+            ResultSet rs = stmt.executeQuery();
+            if (rs.next()) {
+                userId = rs.getString("id");
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        if (userId == null) {
+            exchange.sendResponseHeaders(500, -1);
+            return;
+        }
+
         try (Connection conn = DriverManager.getConnection(DB_URL, USER, PASS)) {
             Map<Integer, List<String>> eventsByDay = new HashMap<>();
             String eventQuery = """
-                      SELECT DAY(date) AS day, title, type
-                         FROM DB2025_liked_events_view
-                         WHERE user_id = ?
-                         AND MONTH(date) = MONTH(CURRENT_DATE)
-                         AND YEAR(date) = YEAR(CURRENT_DATE)
+                        SELECT DAY(date) AS day, title, type
+                        FROM DB2025_EVENT e
+                        JOIN DB2025_EVENT_LIKE l ON e.id = l.event_id
+                        WHERE l.user_id = ?
+                          AND MONTH(date) = MONTH(CURRENT_DATE)
+                          AND YEAR(date) = YEAR(CURRENT_DATE)
                     """;
             try (PreparedStatement stmt = conn.prepareStatement(eventQuery)) {
                 stmt.setString(1, userId);
@@ -119,11 +141,12 @@ public class EONServer {
             }
 
             String ddayQuery = """
-                         SELECT title, DATEDIFF(date, CURRENT_DATE) AS d_day, type
-                             FROM db2025_liked_events_view
-                           WHERE user_id = ?
-                            AND date >= CURRENT_DATE
-                            ORDER BY date
+                        SELECT e.title, DATEDIFF(e.date, CURRENT_DATE) AS d_day, e.type
+                        FROM DB2025_EVENT e
+                        JOIN DB2025_EVENT_LIKE l ON e.id = l.event_id
+                        WHERE l.user_id = ?
+                          AND e.date >= CURRENT_DATE
+                        ORDER BY e.date
                     """;
             try (PreparedStatement stmt = conn.prepareStatement(ddayQuery)) {
                 stmt.setString(1, userId);
@@ -188,6 +211,9 @@ public class EONServer {
         html = html.replace("{{calendarTable}}", calendarTable.toString())
                 .replace("{{ddayList}}", ddayItems.toString());
 
+        // ★ username 쿠키로 클라이언트에 전달
+        html += "<script>document.cookie = 'username=" + userName + "';</script>";
+
         exchange.getResponseHeaders().add("Content-Type", "text/html; charset=utf-8");
         exchange.sendResponseHeaders(200, html.getBytes().length);
         try (OutputStream os = exchange.getResponseBody()) {
@@ -196,7 +222,7 @@ public class EONServer {
     }
 
     private static void handleMypage(HttpExchange exchange) throws IOException {
-        String id = getUserIdFromCookie(exchange);
+        String id = getUserNameFromCookie(exchange);
         if (id == null) {
             exchange.getResponseHeaders().add("Location", "/login.html");
             exchange.sendResponseHeaders(302, -1);
@@ -238,12 +264,25 @@ public class EONServer {
             os.write(html.getBytes());
         }
     }
-
     private static void handleLogin(HttpExchange exchange) throws IOException {
-        if (!exchange.getRequestMethod().equalsIgnoreCase("POST")) {
-            exchange.sendResponseHeaders(405, -1);
+        // ✅ CORS Preflight 요청 처리
+        if ("OPTIONS".equalsIgnoreCase(exchange.getRequestMethod())) {
+            exchange.getResponseHeaders().add("Access-Control-Allow-Origin", "*");
+            exchange.getResponseHeaders().add("Access-Control-Allow-Methods", "POST, OPTIONS");
+            exchange.getResponseHeaders().add("Access-Control-Allow-Headers", "Content-Type");
+            exchange.sendResponseHeaders(204, -1); // No Content
             return;
         }
+
+        if (!exchange.getRequestMethod().equalsIgnoreCase("POST")) {
+            exchange.getResponseHeaders().add("Access-Control-Allow-Origin", "*");
+            exchange.sendResponseHeaders(405, -1); // Method Not Allowed
+            return;
+        }
+
+        // ✅ CORS 응답 헤더 (실제 응답에도 꼭 넣어야 함)
+        exchange.getResponseHeaders().add("Access-Control-Allow-Origin", "*");
+        exchange.getResponseHeaders().add("Content-Type", "application/json");
 
         InputStreamReader isr = new InputStreamReader(exchange.getRequestBody(), StandardCharsets.UTF_8);
         BufferedReader reader = new BufferedReader(isr);
@@ -263,35 +302,40 @@ public class EONServer {
 
         String id = params.get("id");
         String pw = params.get("password");
-        String sql = "SELECT password FROM DB2025_USER WHERE id = ?";
-
+        String sql = "SELECT name, password FROM DB2025_USER WHERE id = ?";
+        String name = null;
         boolean success = false;
+
         try (Connection conn = DriverManager.getConnection(DB_URL, USER, PASS);
              PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setString(1, id);
             ResultSet rs = ps.executeQuery();
             if (rs.next()) {
                 success = rs.getString("password").equals(pw);
+                if (success) {
+                    name = rs.getString("name");
+                }
             }
         } catch (SQLException e) {
             e.printStackTrace();
         }
 
         String res;
-        if (success) {
+        if (success && name != null) {
             String sessionId = UUID.randomUUID().toString();
-            sessionMap.put(sessionId, id);
+            sessionMap.put(sessionId, name);
             exchange.getResponseHeaders().add("Set-Cookie", "sessionId=" + sessionId + "; Path=/");
             res = "{\"success\": true}";
         } else {
             res = "{\"success\": false}";
         }
 
-        exchange.getResponseHeaders().add("Content-Type", "application/json");
         exchange.sendResponseHeaders(200, res.getBytes().length);
-        exchange.getResponseBody().write(res.getBytes());
-        exchange.close();
+        OutputStream os = exchange.getResponseBody();
+        os.write(res.getBytes());
+        os.close();
     }
+
 
     private static void handleSignup(HttpExchange exchange) throws IOException {
         if (!exchange.getRequestMethod().equalsIgnoreCase("POST")) {
