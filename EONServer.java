@@ -584,6 +584,21 @@ public class EONServer {
         }
     }
 
+    private static String getUserIdFromCookie(HttpExchange exchange) {
+        List<String> cookies = exchange.getRequestHeaders().get("Cookie");
+        if(cookies != null){
+            for(String cookie : cookies){
+                for(String pair : cookie.split(";")){
+                    String[] kv = pair.trim().split("=");
+                    if(kv.length == 2 && kv[0].equals("sessionId")){
+                        return sessionMap.get(kv[1]);
+                    }
+                }
+            }
+        }
+        return null;
+    }
+
     private static void handleLogout(HttpExchange exchange) throws IOException {
         // 클라이언트에게 sessionId 쿠키를 삭제하도록 지시
         exchange.getResponseHeaders().add("Set-Cookie", "sessionId=; Path=/; Expires=Thu, 01 Jan 1970 00:00:00 GMT");
