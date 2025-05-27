@@ -69,3 +69,27 @@ if (cellCount > 0) {
   }
   calendarBody.appendChild(currentRow);
 }
+
+window.addEventListener('DOMContentLoaded', () => {
+  const user = getCookie('username');
+  const menuRight = document.querySelector('.menu-right');
+
+  if (user) {
+    menuRight.innerHTML = `
+      <span>${user}</span>
+      <span>|</span>
+      <a href="#" onclick="logout()">로그아웃</a>
+    `;
+  }
+});
+
+function getCookie(name) {
+  const matches = document.cookie.match(new RegExp('(?:^|; )' + name + '=([^;]*)'));
+  return matches ? decodeURIComponent(matches[1]) : undefined;
+}
+
+function logout() {
+  document.cookie = "sessionId=; path=/; max-age=0";
+  document.cookie = "username=; path=/; max-age=0";
+  location.href = "/login.html";
+}
