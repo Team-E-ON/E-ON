@@ -2,6 +2,7 @@ package dbTransaction2025;
 
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpServer;
+
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
@@ -28,8 +29,8 @@ import java.util.UUID;
 public class EONServer {
 
     static final String DB_URL = "jdbc:mysql://localhost:3306/DB2025Team06";
-    static final String USER = "root";
-    static final String PASS = "xuaz0606";
+    static final String USER = "DB2025Team06";
+    static final String PASS = "DB2025Team06";
 
     // 세션 ID → 사용자 ID 매핑
     private static final Map<String, String> sessionMap = new HashMap<>();
@@ -1040,6 +1041,7 @@ public class EONServer {
         }
         return result;
     }
+
     private static void handleScheduleUser(HttpExchange exchange) throws IOException {
         String userId = getUserIdFromCookie(exchange);
         if (userId == null) {
@@ -1052,35 +1054,35 @@ public class EONServer {
 
         try (Connection conn = DriverManager.getConnection(DB_URL, USER, PASS)) {
             String sql = """
-            SELECT 
-                e.id AS event_id,
-                e.title,
-                e.date,
-                e.type,
-                CASE 
-                    WHEN e.type = 'department' THEN d.name
-                    WHEN e.type = 'club' THEN c.name
-                    ELSE '기타'
-                END AS group_name,
-                CASE 
-                    WHEN l.user_id IS NOT NULL THEN true
-                    ELSE false
-                END AS liked
-            FROM DB2025_EVENT e
-            LEFT JOIN DB2025_DEPARTMENT d ON e.type = 'department' AND e.ref_id = d.id
-            LEFT JOIN DB2025_CLUB c ON e.type = 'club' AND e.ref_id = c.id
-            LEFT JOIN db2025_liked_events_view l 
-                   ON e.id = l.event_id AND l.user_id = ?
-            WHERE EXISTS (
-                SELECT 1 FROM DB2025_USER_DEPARTMENT ud 
-                WHERE ud.user_id = ? AND ud.department_id = e.ref_id AND e.type = 'department'
-            )
-            OR EXISTS (
-                SELECT 1 FROM DB2025_USER_CLUB uc 
-                WHERE uc.user_id = ? AND uc.club_id = e.ref_id AND e.type = 'club'
-            )
-            ORDER BY group_name, e.date
-        """;
+                        SELECT 
+                            e.id AS event_id,
+                            e.title,
+                            e.date,
+                            e.type,
+                            CASE 
+                                WHEN e.type = 'department' THEN d.name
+                                WHEN e.type = 'club' THEN c.name
+                                ELSE '기타'
+                            END AS group_name,
+                            CASE 
+                                WHEN l.user_id IS NOT NULL THEN true
+                                ELSE false
+                            END AS liked
+                        FROM DB2025_EVENT e
+                        LEFT JOIN DB2025_DEPARTMENT d ON e.type = 'department' AND e.ref_id = d.id
+                        LEFT JOIN DB2025_CLUB c ON e.type = 'club' AND e.ref_id = c.id
+                        LEFT JOIN db2025_liked_events_view l 
+                               ON e.id = l.event_id AND l.user_id = ?
+                        WHERE EXISTS (
+                            SELECT 1 FROM DB2025_USER_DEPARTMENT ud 
+                            WHERE ud.user_id = ? AND ud.department_id = e.ref_id AND e.type = 'department'
+                        )
+                        OR EXISTS (
+                            SELECT 1 FROM DB2025_USER_CLUB uc 
+                            WHERE uc.user_id = ? AND uc.club_id = e.ref_id AND e.type = 'club'
+                        )
+                        ORDER BY group_name, e.date
+                    """;
 
             try (PreparedStatement stmt = conn.prepareStatement(sql)) {
                 stmt.setString(1, userId);
@@ -1133,8 +1135,6 @@ public class EONServer {
             os.write(response);
         }
     }
-
-
 
 
     private static void handleEditEvent(HttpExchange exchange) throws IOException {
