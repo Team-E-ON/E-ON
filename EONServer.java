@@ -421,6 +421,30 @@ public class EONServer {
         exchange.close();
     }
 
+    // 로그아웃 처리
+    private static void handleLogout(HttpExchange exchange) throws IOException {
+        // 세션 쿠키 무효화
+        exchange.getResponseHeaders().add("Set-Cookie", "sessionId=; Path=/; Expires=Thu, 01 Jan 1970 00:00:00 GMT");
+
+        // 세션맵에서도 삭제
+        List<String> cookies = exchange.getRequestHeaders().get("Cookie");
+        if (cookies != null) {
+            for (String cookie : cookies) {
+                for (String pair : cookie.split(";")) {
+                    String[] kv = pair.trim().split("=");
+                    if (kv.length == 2 && kv[0].equals("sessionId")) {
+                        sessionMap.remove(kv[1]);
+                        break;
+                    }
+                }
+            }
+        }
+
+        // 로그인 페이지로 리디렉션
+        exchange.getResponseHeaders().add("Location", "/login.html");
+        exchange.sendResponseHeaders(302, -1);
+        exchange.close();
+    }
     // 회원가입 요청 처리
     private static void handleSignup(HttpExchange exchange) throws IOException {
         // POST 요청만 허용
@@ -684,31 +708,6 @@ public class EONServer {
             e.printStackTrace();
             exchange.sendResponseHeaders(500, -1); // 서버 오류
         }
-    }
-
-    // 로그아웃 처리
-    private static void handleLogout(HttpExchange exchange) throws IOException {
-        // 세션 쿠키 무효화
-        exchange.getResponseHeaders().add("Set-Cookie", "sessionId=; Path=/; Expires=Thu, 01 Jan 1970 00:00:00 GMT");
-
-        // 세션맵에서도 삭제
-        List<String> cookies = exchange.getRequestHeaders().get("Cookie");
-        if (cookies != null) {
-            for (String cookie : cookies) {
-                for (String pair : cookie.split(";")) {
-                    String[] kv = pair.trim().split("=");
-                    if (kv.length == 2 && kv[0].equals("sessionId")) {
-                        sessionMap.remove(kv[1]);
-                        break;
-                    }
-                }
-            }
-        }
-
-        // 로그인 페이지로 리디렉션
-        exchange.getResponseHeaders().add("Location", "/login.html");
-        exchange.sendResponseHeaders(302, -1);
-        exchange.close();
     }
 
     // 일정 페이지 처리 (로그인 사용자의 일정 출력)
