@@ -445,6 +445,7 @@ public class EONServer {
         exchange.sendResponseHeaders(302, -1);
         exchange.close();
     }
+
     // 회원가입 요청 처리
     private static void handleSignup(HttpExchange exchange) throws IOException {
         // POST 요청만 허용
@@ -498,7 +499,7 @@ public class EONServer {
         return list;
     }
 
-    // 전공 이름을 ID로 변환
+    // 전공 이름을 툭정 숫자로 변환
     private static long mapMajor(String name) {
         return switch (name) {
             case "컴퓨터공학과" -> 1;
