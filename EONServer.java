@@ -2,7 +2,6 @@ package dbTransaction2025;
 
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpServer;
-
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
@@ -474,7 +473,7 @@ public class EONServer {
         String password = params.get("password").get(0);
         long majorId = mapMajor(params.get("major").get(0));
         List<Long> minors = mapAll(params.getOrDefault("minors[]", List.of()));
-        List<Long> clubs = mapAll(params.getOrDefault("clubs[]", List.of()));
+        List<Long> clubs = mapAllClub(params.getOrDefault("clubs[]", List.of()));  // ✅ 이렇게 수정
 
         // 사용자 정보 DB에 저장
         boolean success = insertUserAll(id, name, password, majorId, minors, clubs);
@@ -509,6 +508,26 @@ public class EONServer {
             default -> -1; // 일치하는 전공 없으면 -1 반환
         };
     }
+    private static long mapClub(String name) {
+        return switch (name) {
+            case "AI 연구회" -> 201;
+            case "보안 동아리" -> 202;
+            case "데이터사이언스 클럽" -> 203;
+            default -> -1;
+        };
+    }
+    
+    private static List<Long> mapAllClub(List<String> names) {
+        List<Long> list = new ArrayList<>();
+        for (String n : names) {
+            long id = n.matches("\\d+") ? Long.parseLong(n) : mapClub(n);
+            if (id > 0) {
+                list.add(id);
+            }
+        }
+        return list;
+    }
+    
 
     // 사용자 전체 등록 메서드 (전공, 복수전공, 동아리까지 포함)
     private static boolean insertUserAll(long id, String name, String password, long majorId, List<Long> minors,

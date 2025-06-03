@@ -55,8 +55,39 @@ document.addEventListener("DOMContentLoaded", () => {
       console.log("복수/부전공:", subMajors);
       console.log("동아리:", clubs);
   
-      alert("회원가입이 완료되었습니다!");
-      window.location.href = "login.html"; 
+    
+            // POST용 데이터 구성
+      const formData = new URLSearchParams();
+      formData.append("id", studentId);
+      formData.append("name", name);
+      formData.append("password", "1234"); // 테스트용
+      formData.append("major", major);
+      subMajors.forEach(m => formData.append("minors[]", m));
+      clubs.forEach(c => formData.append("clubs[]", c));
+
+      // 서버로 전송
+      fetch("/signup", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/x-www-form-urlencoded",
+        },
+        body: formData.toString()
+      })
+      .then(res => res.json())
+      .then(data => {
+        if (data.success) {
+          alert("회원가입이 완료되었습니다!");
+          window.location.href = "login.html";
+        } else {
+          alert("회원가입 실패: 이미 존재하는 ID입니다.");
+        }
+      })
+      .catch(err => {
+        console.error("에러 발생:", err);
+        alert("서버 오류가 발생했습니다.");
+      });
+
+
     });
   });
   
