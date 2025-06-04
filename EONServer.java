@@ -27,6 +27,7 @@ import java.util.UUID;
 
 public class EONServer {
 
+    // 데이터베이스 연결 관련 변수
     static final String DB_URL = "jdbc:mysql://localhost:3306/DB2025Team06";
     static final String USER = "DB2025Team06";
     static final String PASS = "DB2025Team06";
@@ -81,7 +82,6 @@ public class EONServer {
         server.createContext("/schedule_user", EONServer::handleScheduleUser);
 
         server.createContext("/event/like", EONServer::handleEventLike);
-
 
         server.setExecutor(null);
         server.start();
@@ -508,12 +508,14 @@ public class EONServer {
             default -> -1; // 일치하는 전공 없으면 -1 반환
         };
     }
+
+    // 동아리 이름을 툭정 숫자로 변환
     private static long mapClub(String name) {
         return switch (name) {
             case "AI 연구회" -> 201;
             case "보안 동아리" -> 202;
             case "데이터사이언스 클럽" -> 203;
-            default -> -1;
+            default -> -1; // 일치하는 동아리 없으면 -1 반환
         };
     }
     
@@ -527,7 +529,6 @@ public class EONServer {
         }
         return list;
     }
-    
 
     // 사용자 전체 등록 메서드 (전공, 복수전공, 동아리까지 포함)
     private static boolean insertUserAll(long id, String name, String password, long majorId, List<Long> minors,
